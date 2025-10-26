@@ -1,64 +1,93 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
-class BottomNav extends StatelessWidget {
+class FloatingNav extends StatefulWidget {
   final int currentIndex;
   final Function(int) onTap;
 
-  const BottomNav({super.key, required this.currentIndex, required this.onTap});
+  const FloatingNav({
+    super.key,
+    required this.currentIndex,
+    required this.onTap,
+  });
+
+  @override
+  State<FloatingNav> createState() => _FloatingNavState();
+}
+
+class _FloatingNavState extends State<FloatingNav> {
+  bool _navVisible = true;
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onTap,
-      type: BottomNavigationBarType.fixed,
-      selectedItemColor: const Color(0xFF7D54DF),
-      unselectedItemColor: Colors.grey,
-      showSelectedLabels: false,
-      showUnselectedLabels: false,
-      items: [
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.home_rounded),
-          label: '',
-        ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.chat_bubble_outline_rounded),
-          label: '',
-        ),
-
-        BottomNavigationBarItem(
-          icon: Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              color: Color(0xFF7D54DF),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black26,
-                  blurRadius: 4,
-                  offset: Offset(0, 3),
-                ),
-              ],
+    return AnimatedSlide(
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOutCubic,
+      offset: _navVisible ? Offset.zero : const Offset(0, 1.5),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeOutCubic,
+        height: 70,
+        margin: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
+        decoration: BoxDecoration(
+          color: Colors.white.withOpacity(0.95),
+          borderRadius: BorderRadius.circular(40),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black12.withOpacity(0.1),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            child: const Icon(
-              Icons.add,
-              color: Colors.white,
-              size: 28,
-            ),
-          ),
-          label: '',
+          ],
         ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          children: [
+            _buildNavItem(Icons.home_rounded, 0),
+            _buildNavItem(Icons.chat_bubble_outline_rounded, 1),
 
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.notifications_none_rounded),
-          label: '',
+            // 🔹 Tombol tambah di tengah
+            Container(
+              width: 55,
+              height: 55,
+              decoration: BoxDecoration(
+                color: const Color(0xFF7D54DF),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF7D54DF).withOpacity(0.4),
+                    blurRadius: 10,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const Icon(Icons.add, color: Colors.white, size: 30),
+            ),
+
+            _buildNavItem(Icons.notifications_none_rounded, 3),
+            _buildNavItem(Icons.person_outline_rounded, 4),
+          ],
         ),
-        const BottomNavigationBarItem(
-          icon: Icon(Icons.person_outline_rounded),
-          label: '',
-        ),
-      ],
+      ),
     );
+  }
+
+  Widget _buildNavItem(IconData icon, int index) {
+    final isSelected = widget.currentIndex == index;
+    return IconButton(
+      icon: Icon(
+        icon,
+        color: isSelected ? const Color(0xFF7D54DF) : Colors.grey,
+        size: isSelected ? 30 : 26,
+      ),
+      onPressed: () => widget.onTap(index),
+    );
+  }
+
+  // 🔹 fungsi buat kontrol hide/show nav dari luar
+  void setVisibility(bool visible) {
+    if (visible != _navVisible) {
+      setState(() => _navVisible = visible);
+    }
   }
 }
