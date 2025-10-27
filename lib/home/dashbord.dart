@@ -12,11 +12,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'TanggapanKu App',
       theme: ThemeData(
-        primarySwatch: Colors.deepPurple,
+        primarySwatch: Colors.blueGrey,
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        textTheme: GoogleFonts.montserratTextTheme(
+        textTheme: GoogleFonts.poppinsTextTheme(
           Theme.of(context).textTheme,
         ),
       ),
@@ -39,66 +40,88 @@ class _LoginPageState extends State<LoginPage> {
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
+    // Tinggi yang diambil oleh keyboard
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
 
-    const Color primaryPurple = Color(0xFF7A4DFB);
-    const Color accentTeal = Color(0xFF4DD0E1);
-    const Color lightGreyBg = Color(0xFFE0E0E0);
-    const Color neonYellow = Color(0xFFF7F10C); // Warna kuning cerah/neon
+    const Color primaryBlueDark = Color(0xFF2C3E50);
+    const Color accentBlue = Color(0xFF3F51B5);
+    const Color lightGrey = Color(0xFFF5F5F5);
 
     return Scaffold(
-      backgroundColor: primaryPurple,
-      body: Stack(
+      backgroundColor: primaryBlueDark,
+      // Menggunakan Column utama sebagai body Scaffold tanpa SingleChildScrollView
+      body: Column(
         children: [
-          // Bagian atas dengan logo dan teks
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
+          // Bagian atas dengan gelombang
+          ClipPath(
             child: Container(
-              height: screenHeight * 0.45, // Meningkatkan tinggi container atas
-              color: primaryPurple,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
+              height: screenHeight * 0.42 -
+                  keyboardHeight *
+                      0.1, // Sedikit mengurangi tinggi jika keyboard muncul
+              width: screenWidth,
+              color: primaryBlueDark,
+              child: Stack(
                 children: [
-                  SizedBox(height: screenHeight * 0.05),
-                  // Logo Container
-                  Container(
-                    width: screenWidth * 0.25,
-                    height: screenWidth * 0.25,
-                    decoration: BoxDecoration(
-                      color: accentTeal,
-                      borderRadius: BorderRadius.circular(screenWidth * 0.02),
-                    ),
-                    child: Center(
-                      child: Image.network(
-                        'https://i.imgur.com/G5c862O.png',
-                        color: Colors.white,
-                        width: screenWidth * 0.18,
-                        height: screenWidth * 0.18,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Icon(Icons.shield,
-                              color: Colors.white, size: screenWidth * 0.18);
-                        },
-                      ),
+                  // --- Tempat untuk menambahkan FOTO PEREMPUAN ---
+                  // Jika foto akan ditambahkan, pastikan ukurannya tidak membuat overflow.
+                  // Misalnya, sesuaikan tinggi dan posisi agar tidak bertabrakan dengan teks.
+                  Positioned(
+                    bottom: -20,
+                    right: 0,
+                    child: Image.asset(
+                      'assets/egi.png',
+                      height: screenHeight *
+                          0.90, // Disesuaikan agar tidak terlalu tinggi
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  SizedBox(height: screenHeight * 0.03),
-                  // Teks "TANGGAPANku"
-                  RichText(
-                    text: TextSpan(
-                      style: GoogleFonts.kanit(
-                        fontSize: screenWidth * 0.13,
-                        fontWeight: FontWeight.bold,
-                      ),
-                      children: const <TextSpan>[
-                        TextSpan(
-                          text: 'TANGGAPAN',
-                          style: TextStyle(color: Colors.white),
+                  // --------------------------------------------------
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: screenHeight * 0.08, left: screenWidth * 0.07),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Log in',
+                              style: GoogleFonts.poppins(
+                                fontSize: screenWidth * 0.07,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(width: screenWidth * 0.02),
+                            // Ganti bagian ini:
+                            // Icon(Icons.flight, color: Colors.white, size: screenWidth * 0.05),
+
+                            // Dengan ini:
+                            Image.asset(
+                              'assets/Logo.png', // Pastikan path ini benar
+                              height: screenWidth *
+                                  0.05, // Gunakan tinggi yang sama dengan ukuran ikon sebelumnya
+                              fit:
+                                  BoxFit.contain, // Agar gambar tidak terpotong
+                            ),
+                          ],
                         ),
-                        TextSpan(
-                          text: 'KU',
-                          style:
-                              TextStyle(color: neonYellow), // Kuning cerah/neon
+                        Text(
+                          'TanggapanKU',
+                          style: GoogleFonts.poppins(
+                            fontSize: screenWidth * 0.08,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.03),
+                        Text(
+                          '"Pengaduan warga menjadi\nmudah dan praktis."',
+                          style: GoogleFonts.poppins(
+                            fontSize: screenWidth * 0.045,
+                            color: Colors.white70,
+                            height: 1.4,
+                          ),
                         ),
                       ],
                     ),
@@ -107,36 +130,25 @@ class _LoginPageState extends State<LoginPage> {
               ),
             ),
           ),
-          // Bagian bawah dengan form login
-          Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
+
+          // Bagian bawah dengan form login (menggunakan Expanded)
+          Expanded(
+            // Expanded akan mengambil sisa ruang yang tersedia
             child: Container(
-              height: screenHeight * 0.6, // Mengurangi tinggi container putih
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(40),
-                  topRight: Radius.circular(40),
-                ),
-              ),
+              width: screenWidth,
+              color: Colors.white,
               child: Padding(
                 padding: EdgeInsets.symmetric(
                     horizontal: screenWidth * 0.07,
-                    vertical: screenHeight * 0.03),
+                    vertical: screenHeight * 0.04),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  // Gunakan MainAxisAlignment.spaceBetween untuk menyebar elemen
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      'LOGIN',
-                      style: GoogleFonts.rubik(
-                        fontSize: screenWidth * 0.08,
-                        fontWeight: FontWeight.bold,
-                        color: primaryPurple,
-                      ),
-                    ),
-                    SizedBox(height: screenHeight * 0.04),
+                    // Spasi atas ini bisa dihapus atau dikurangi jika pakai spaceBetween
+                    // SizedBox(height: screenHeight * 0.02),
+
                     // Input NIK
                     TextField(
                       keyboardType: TextInputType.number,
@@ -145,38 +157,61 @@ class _LoginPageState extends State<LoginPage> {
                       ],
                       decoration: InputDecoration(
                         hintText: 'NIK',
-                        hintStyle: GoogleFonts.asapCondensed(
+                        hintStyle: GoogleFonts.poppins(
                             color: Colors.grey[600],
                             fontSize: screenWidth * 0.04),
                         filled: true,
-                        fillColor: lightGreyBg,
+                        fillColor: Colors.white,
+                        prefixIcon: Icon(Icons.person,
+                            color: Colors.grey, size: screenWidth * 0.06),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(color: Colors.grey.shade400),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.grey.shade400),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              const BorderSide(color: accentBlue, width: 2),
                         ),
                         contentPadding: EdgeInsets.symmetric(
                             vertical: screenHeight * 0.02,
-                            horizontal: screenWidth * 0.05),
+                            horizontal: screenWidth * 0.03),
                       ),
                     ),
-                    SizedBox(height: screenHeight * 0.025),
+                    // SizedBox(height: screenHeight * 0.025), // Spasi ini bisa diatur oleh spaceBetween
+
                     // Input Password
                     TextField(
                       obscureText: !_isPasswordVisible,
                       decoration: InputDecoration(
                         hintText: 'Password',
-                        hintStyle: GoogleFonts.asapCondensed(
+                        hintStyle: GoogleFonts.poppins(
                             color: Colors.grey[600],
                             fontSize: screenWidth * 0.04),
                         filled: true,
-                        fillColor: lightGreyBg,
+                        fillColor: Colors.white,
+                        prefixIcon: Icon(Icons.lock,
+                            color: Colors.grey, size: screenWidth * 0.06),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: BorderSide.none,
+                          borderSide: BorderSide(color: Colors.grey.shade400),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide: BorderSide(color: Colors.grey.shade400),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(10),
+                          borderSide:
+                              const BorderSide(color: accentBlue, width: 2),
                         ),
                         contentPadding: EdgeInsets.symmetric(
                             vertical: screenHeight * 0.02,
-                            horizontal: screenWidth * 0.05),
+                            horizontal: screenWidth * 0.03),
                         suffixIcon: IconButton(
                           icon: Icon(
                             _isPasswordVisible
@@ -193,7 +228,8 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-                    SizedBox(height: screenHeight * 0.01),
+                    // SizedBox(height: screenHeight * 0.01), // Spasi ini bisa diatur oleh spaceBetween
+
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
@@ -202,85 +238,111 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         child: Text(
                           'Lupa Password?',
-                          style: GoogleFonts.asapCondensed(
-                              color: const Color(0xFF5D3AC6),
+                          style: GoogleFonts.poppins(
+                              color: accentBlue,
                               fontSize: screenWidth * 0.035,
                               fontWeight: FontWeight.w600),
                         ),
                       ),
                     ),
-                    SizedBox(height: screenHeight * 0.035),
+                    // SizedBox(height: screenHeight * 0.035), // Spasi ini bisa diatur oleh spaceBetween
+
                     // Tombol Masuk
-                    Center(
-                      child: SizedBox(
-                        width: screenWidth * 0.6,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            // Handle Login
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryPurple,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                            padding: EdgeInsets.symmetric(
-                                vertical: screenHeight * 0.02),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton(
+                        onPressed: () {
+                          // Handle Login
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: accentBlue,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: Text(
-                            'Masuk',
-                            style: GoogleFonts.asapCondensed(
-                              fontSize: screenWidth * 0.045,
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          padding: EdgeInsets.symmetric(
+                              vertical: screenHeight * 0.02),
+                        ),
+                        child: Text(
+                          'Masuk',
+                          style: GoogleFonts.poppins(
+                            fontSize: screenWidth * 0.045,
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                       ),
                     ),
-                    const Spacer(),
-                    // Teks "Belum punya akun?"
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          'Belum punya akun? ',
-                          style: GoogleFonts.asapCondensed(
-                              color: Colors.black54,
-                              fontSize: screenWidth * 0.035),
+                    // SizedBox(height: screenHeight * 0.03), // Spasi ini bisa diatur oleh spaceBetween
+
+                    Text(
+                      'Belum punya akun?',
+                      style: GoogleFonts.poppins(
+                          color: Colors.grey[700],
+                          fontSize: screenWidth * 0.035),
+                    ),
+                    // SizedBox(height: screenHeight * 0.02), // Spasi ini bisa diatur oleh spaceBetween
+
+                    // Tombol Daftar
+                    SizedBox(
+                      width: double.infinity,
+                      child: OutlinedButton(
+                        onPressed: () {
+                          // Handle Daftar
+                        },
+                        style: OutlinedButton.styleFrom(
+                          foregroundColor: accentBlue,
+                          side: const BorderSide(color: accentBlue, width: 2),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                              vertical: screenHeight * 0.02),
                         ),
-                        GestureDetector(
-                          onTap: () {
-                            // Handle Daftar Sekarang
-                          },
-                          child: Text(
-                            'Daftar Sekarang',
-                            style: GoogleFonts.asapCondensed(
-                              color: const Color(0xFF5D3AC6),
-                              fontWeight: FontWeight.bold,
-                              fontSize: screenWidth * 0.035,
-                            ),
+                        child: Text(
+                          'Daftar',
+                          style: GoogleFonts.poppins(
+                            fontSize: screenWidth * 0.045,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                    SizedBox(height: screenHeight * 0.02),
+                    // SizedBox(height: screenHeight * 0.06), // Spasi ini bisa diatur oleh spaceBetween
+
+                    // Teks Legal
+                    Padding(
+                      padding:
+                          EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
+                      child: RichText(
+                        textAlign: TextAlign.center,
+                        text: TextSpan(
+                          style: GoogleFonts.poppins(
+                              fontSize: screenWidth * 0.03,
+                              color: Colors.grey[600]),
+                          children: <TextSpan>[
+                            const TextSpan(
+                                text: 'Dengan ini saya menyetujui\n'),
+                            TextSpan(
+                              text: 'Kebijakan Privasi',
+                              style: GoogleFonts.poppins(
+                                color: accentBlue,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                            const TextSpan(text: ' dan '),
+                            TextSpan(
+                              text: 'Syarat Ketentuan Aplikasi',
+                              style: GoogleFonts.poppins(
+                                color: accentBlue,
+                                decoration: TextDecoration.underline,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    // SizedBox(height: screenHeight * 0.02), // Spasi ini bisa diatur oleh spaceBetween
                   ],
-                ),
-              ),
-            ),
-          ),
-          // Garis bawah tombol "Masuk"
-          Positioned(
-            bottom: screenHeight * 0.005,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                height: 4,
-                width: screenWidth * 0.3,
-                decoration: BoxDecoration(
-                  color: Colors.black38,
-                  borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
@@ -288,5 +350,34 @@ class _LoginPageState extends State<LoginPage> {
         ],
       ),
     );
+  }
+}
+
+// CustomClipper untuk membuat bentuk gelombang
+class WaveClipper extends CustomClipper<Path> {
+  @override
+  Path getClip(Size size) {
+    var path = Path();
+    path.lineTo(0, size.height * 0.8);
+
+    var firstControlPoint = Offset(size.width * 0.25, size.height);
+    var firstEndPoint = Offset(size.width * 0.5, size.height * 0.8);
+    path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
+        firstEndPoint.dx, firstEndPoint.dy);
+
+    var secondControlPoint = Offset(size.width * 0.75, size.height * 0.6);
+    var secondEndPoint = Offset(size.width, size.height * 0.75);
+    path.quadraticBezierTo(secondControlPoint.dx, secondControlPoint.dy,
+        secondEndPoint.dx, secondEndPoint.dy);
+
+    path.lineTo(size.width, 0);
+    path.close();
+
+    return path;
+  }
+
+  @override
+  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
+    return false;
   }
 }

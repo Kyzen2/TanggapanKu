@@ -1,0 +1,3 @@
+- [x] Edit lib/main.dart to add debugShowCheckedModeBanner: false to MaterialApp
+- [x] Edit lib/home/dashbord.dart to add debugShowCheckedModeBanner: false to MaterialApp
+- [x] Move egi.png image down by adjusting bottom property in lib/home/dashbord.dart
