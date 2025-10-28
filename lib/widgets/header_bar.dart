@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../pages/profile_page.dart';
 
 class HeaderBar extends StatelessWidget {
   const HeaderBar({super.key});
@@ -16,10 +17,20 @@ class HeaderBar extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const CircleAvatar(
-            radius: 20,
-            backgroundImage: NetworkImage('https://i.pravatar.cc/100?img=10'),
+          InkWell(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfilePage()),
+              );
+            },
+            borderRadius: BorderRadius.circular(20),
+            child: CircleAvatar(
+              radius: 20,
+              backgroundImage: NetworkImage('https://i.pravatar.cc/100?img=10'),
+            ),
           ),
+
           const Spacer(),
           Container(
             padding: const EdgeInsets.all(8),

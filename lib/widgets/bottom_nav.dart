@@ -46,7 +46,6 @@ class _FloatingNavState extends State<FloatingNav> {
             _buildNavItem(Icons.home_rounded, 0),
             _buildNavItem(Icons.chat_bubble_outline_rounded, 1),
 
-            // 🔹 Tombol tambah di tengah
             Container(
               width: 55,
               height: 55,
@@ -84,7 +83,7 @@ class _FloatingNavState extends State<FloatingNav> {
     );
   }
 
-  // 🔹 fungsi buat kontrol hide/show nav dari luar
+  //fungsi kontrol hide/show nav dari luar
   void setVisibility(bool visible) {
     if (visible != _navVisible) {
       setState(() => _navVisible = visible);
