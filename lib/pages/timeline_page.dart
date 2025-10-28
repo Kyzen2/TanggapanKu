@@ -97,7 +97,7 @@ class _TimelinePageState extends State<TimelinePage> {
                         autoPlay: true,
                         enlargeCenterPage: true,
                         viewportFraction: 0.9,
-                        autoPlayInterval: const Duration(seconds: 3),
+                        autoPlayInterval: const Duration(seconds: 5),
                         autoPlayAnimationDuration:
                             const Duration(milliseconds: 800),
                       ),
