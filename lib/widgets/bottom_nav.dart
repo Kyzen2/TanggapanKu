@@ -14,6 +14,21 @@ class FloatingNav extends StatefulWidget {
   @override
   State<FloatingNav> createState() => _FloatingNavState();
 }
+String _getLabel(int index) {
+  switch (index) {
+    case 0:
+      return "Beranda";
+    case 1:
+      return "Chat";
+    case 3:
+      return "Notif";
+    case 4:
+      return "Profil";
+    default:
+      return "";
+  }
+}
+
 
 class _FloatingNavState extends State<FloatingNav> {
   bool _navVisible = true;
@@ -72,16 +87,33 @@ class _FloatingNavState extends State<FloatingNav> {
   }
 
   Widget _buildNavItem(IconData icon, int index) {
-    final isSelected = widget.currentIndex == index;
-    return IconButton(
-      icon: Icon(
-        icon,
-        color: isSelected ? const Color(0xFF7D54DF) : Colors.grey,
-        size: isSelected ? 30 : 26,
-      ),
-      onPressed: () => widget.onTap(index),
-    );
-  }
+  final isSelected = widget.currentIndex == index;
+  return InkWell(
+    borderRadius: BorderRadius.circular(30),
+    onTap: () => widget.onTap(index),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Icon(
+          icon,
+          color: isSelected ? const Color(0xFF7D54DF) : Colors.grey,
+          size: isSelected ? 28 : 24,
+        ),
+        const SizedBox(height: 4),
+        Text(
+          _getLabel(index),
+          style: TextStyle(
+            fontSize: 11,
+            fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+            color: isSelected ? const Color(0xFF7D54DF) : Colors.grey,
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
 
   //fungsi kontrol hide/show nav dari luar
   void setVisibility(bool visible) {

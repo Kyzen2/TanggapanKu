@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
-import '../pages/profile_page.dart';
+// import '../pages/profile_page.dart';
 
 class HeaderBar extends StatelessWidget {
   const HeaderBar({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // sementara nama user hardcode
+    final String userName = "Muhamad Nabil Nur Praja";
+
     return Container(
-      height: 56,
+      height: 70,
       padding: const EdgeInsets.symmetric(horizontal: 12),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -17,21 +20,44 @@ class HeaderBar extends StatelessWidget {
       ),
       child: Row(
         children: [
+          // FOTO PROFIL
           InkWell(
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => ProfilePage()),
-              );
-            },
             borderRadius: BorderRadius.circular(20),
             child: CircleAvatar(
-              radius: 20,
+              radius: 23,
               backgroundImage: NetworkImage('https://i.pravatar.cc/100?img=10'),
             ),
           ),
 
-          const Spacer(),
+          const SizedBox(width: 12),
+
+          // TEKS WELCOME + NAMA USER
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  "Welcome",
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
+                  ),
+                ),
+                Text(
+                  userName,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
+            ),
+          ),
+
+          // ICON 1
           Container(
             padding: const EdgeInsets.all(8),
             decoration: const BoxDecoration(
@@ -40,7 +66,10 @@ class HeaderBar extends StatelessWidget {
             ),
             child: const Icon(Icons.ac_unit, color: Colors.white, size: 18),
           ),
-          const Spacer(),
+
+          const SizedBox(width: 10),
+
+          // ICON SETTINGS
           IconButton(
             onPressed: () {},
             icon: const Icon(Icons.settings_rounded, color: Color(0xFF7D54DF)),

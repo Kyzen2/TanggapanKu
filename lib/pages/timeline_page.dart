@@ -133,6 +133,22 @@ class _TimelinePageState extends State<TimelinePage> {
                 ),
 
                 // 🔹 Post list
+                
+                // 🔹 Judul berita
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+                    child: Text(
+                      "Berita Terbaru",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // 🔹 Post list
                 SliverList.separated(
                   itemCount: posts.length,
                   separatorBuilder: (_, __) => const Gap(8),
@@ -142,6 +158,7 @@ class _TimelinePageState extends State<TimelinePage> {
                     child: PostCard(post: posts[index]),
                   ),
                 ),
+
 
                 // 🔹 sedikit ruang di bawah biar tidak ketutupan navbar
                 const SliverToBoxAdapter(child: SizedBox(height: 100)),
