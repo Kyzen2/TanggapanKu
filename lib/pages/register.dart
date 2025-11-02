@@ -45,94 +45,106 @@ class _RegisterPageState extends State<RegisterPage> {
     const Color primaryBlueDark = Color(0xFF2C3E50);
     const Color accentBlue = Color(0xFF3F51B5);
 
+    // Tinggi yang diambil oleh keyboard.
+    // Kita akan menggunakan ini di SingleChildScrollView agar bagian bawah bisa discroll.
+    final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+    final bool isKeyboardActive = keyboardHeight > 0;
+
     return Scaffold(
       backgroundColor: primaryBlueDark,
-      // Hapus SingleChildScrollView
-      body: Column(
-        children: [
-          // Bagian atas
-          // Menurunkan tinggi bagian atas agar ada lebih banyak ruang untuk form
-          Container(
-            height: screenHeight * 0.35, // Disesuaikan agar lebih kecil
-            width: screenWidth,
-            color: primaryBlueDark,
-            child: Stack(
-              children: [
-                Positioned(
-                  // Sesuaikan posisi gambar agar tetap terlihat proporsional
-                  bottom: -screenHeight * 0.05, // sedikit lebih tinggi
-                  right: 0,
-                  child: Image.asset(
-                    'assets/egi.png',
-                    height: screenHeight * 0.50, // Tinggi gambar disesuaikan
-                    fit: BoxFit.fitHeight,
-                  ),
-                ),
-                Padding(
-                  padding: EdgeInsets.only(
-                      top: screenHeight * 0.08, left: screenWidth * 0.07),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            'Daftar',
-                            style: GoogleFonts.poppins(
-                              fontSize: screenWidth * 0.07,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.white,
-                            ),
-                          ),
-                          SizedBox(width: screenWidth * 0.02),
-                          Image.asset(
-                            'assets/Logo.png',
-                            height: screenWidth * 0.05,
-                            fit: BoxFit.contain,
-                          ),
-                        ],
-                      ),
-                      Text(
-                        'TanggapanKU',
-                        style: GoogleFonts.poppins(
-                          fontSize: screenWidth * 0.08,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      SizedBox(height: screenHeight * 0.02), // Spasi dikurangi
-                      Text(
-                        '"Pengaduan warga menjadi\nmudah dan praktis."',
-                        style: GoogleFonts.poppins(
-                          fontSize: screenWidth * 0.045,
-                          color: Colors.white70,
-                          height: 1.4,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // Bagian bawah dengan form register
-          Expanded(
-            // Gunakan Expanded agar bagian ini mengambil sisa ruang
-            child: Container(
+      // Menggunakan SingleChildScrollView agar keseluruhan layar bisa di-scroll
+      // ketika keyboard muncul, mencegah overflow.
+      body: SingleChildScrollView(
+        // Menambahkan Physics agar scroll tetap bisa terjadi meskipun kontennya pas
+        physics: const ClampingScrollPhysics(),
+        child: Column(
+          children: [
+            // Bagian atas
+            Container(
+              height: screenHeight * 0.35,
               width: screenWidth,
+              color: primaryBlueDark,
+              child: Stack(
+                children: [
+                  Positioned(
+                    // Mengubah posisi left agar responsif
+                    // Contoh: Ditempatkan di sekitar 55% dari lebar layar dari kiri
+                    // atau bisa juga dihitung dari kanan dengan right: screenWidth * -0.2 (jika ingin menjorok)
+                    // Saya akan membuatnya lebih dinamis
+                    bottom: -screenHeight * 0.05,
+                    right: -screenWidth *
+                        0.1, // Geser sedikit ke kanan agar masuk layar
+                    child: Image.asset(
+                      'assets/egi.png',
+                      height: screenHeight * 0.50,
+                      fit: BoxFit.fitHeight,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.only(
+                        top: screenHeight * 0.08, left: screenWidth * 0.07),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              'Daftar',
+                              style: GoogleFonts.poppins(
+                                fontSize: screenWidth * 0.07,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                            SizedBox(width: screenWidth * 0.02),
+                            Image.asset(
+                              'assets/Logo.png',
+                              height: screenWidth * 0.05,
+                              fit: BoxFit.contain,
+                            ),
+                          ],
+                        ),
+                        Text(
+                          'TanggapanKU',
+                          style: GoogleFonts.poppins(
+                            fontSize: screenWidth * 0.08,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                        SizedBox(height: screenHeight * 0.02),
+                        Text(
+                          '"Pengaduan warga menjadi\nmudah dan praktis."',
+                          style: GoogleFonts.poppins(
+                            fontSize: screenWidth * 0.045,
+                            color: Colors.white70,
+                            height: 1.4,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            // Bagian bawah dengan form register
+            Container(
+              width: screenWidth,
+              // Tinggi dihitung agar mengisi sisa ruang,
+              // namun tetap mempertimbangkan keyboard jika aktif
+              height: (screenHeight * 0.65) -
+                  (isKeyboardActive ? keyboardHeight : 0),
               color: Colors.white,
-              // Padding vertikal dikurangi agar lebih compact
               padding: EdgeInsets.symmetric(
                   horizontal: screenWidth * 0.07,
-                  vertical:
-                      screenHeight * 0.02), // Padding vertikal lebih kecil
+                  vertical: screenHeight * 0.02),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment
-                    .spaceBetween, // Distribusi ruang antar elemen
+                // Gunakan MainAxisAlignment.spaceEvenly atau .start dengan spacer manual
+                // agar lebih terkontrol saat keyboard muncul
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
-                  // Input NIK
                   _buildTextField(
                     context,
                     hintText: 'NIK',
@@ -140,17 +152,15 @@ class _RegisterPageState extends State<RegisterPage> {
                     keyboardType: TextInputType.number,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
-                  _buildSpacer(screenHeight * 0.015), // Spacer lebih kecil
+                  // _buildSpacer(screenHeight * 0.015), // Hapus spacer jika pakai spaceEvenly
 
-                  // Input Nama Lengkap
                   _buildTextField(
                     context,
                     hintText: 'Nama Lengkap',
                     icon: Icons.person,
                   ),
-                  _buildSpacer(screenHeight * 0.015),
+                  // _buildSpacer(screenHeight * 0.015),
 
-                  // Input No Whatsapp
                   _buildTextField(
                     context,
                     hintText: 'No Whatsapp',
@@ -158,9 +168,8 @@ class _RegisterPageState extends State<RegisterPage> {
                     keyboardType: TextInputType.phone,
                     inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
-                  _buildSpacer(screenHeight * 0.015),
+                  // _buildSpacer(screenHeight * 0.015),
 
-                  // Input Password
                   _buildPasswordField(
                     context,
                     hintText: 'Password',
@@ -171,9 +180,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       });
                     },
                   ),
-                  _buildSpacer(screenHeight * 0.015),
+                  // _buildSpacer(screenHeight * 0.015),
 
-                  // Input Ulangi Password
                   _buildPasswordField(
                     context,
                     hintText: 'Ulangi Password',
@@ -184,9 +192,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       });
                     },
                   ),
-                  _buildSpacer(screenHeight * 0.025), // Spacer untuk tombol
+                  // _buildSpacer(screenHeight * 0.025),
 
-                  // Tombol Daftar
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -198,7 +205,6 @@ class _RegisterPageState extends State<RegisterPage> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
-                        // Padding vertikal tombol disesuaikan
                         padding: EdgeInsets.symmetric(
                             vertical: screenHeight * 0.015),
                       ),
@@ -212,9 +218,8 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                   ),
-                  _buildSpacer(screenHeight * 0.02), // Spacer untuk teks legal
+                  // _buildSpacer(screenHeight * 0.02),
 
-                  // Teks Legal
                   Padding(
                     padding:
                         EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
@@ -245,12 +250,11 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                   ),
-                  // _buildSpacer(screenHeight * 0.01), // Spacer di bagian paling bawah
                 ],
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -264,8 +268,7 @@ class _RegisterPageState extends State<RegisterPage> {
     List<TextInputFormatter>? inputFormatters,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight =
-        MediaQuery.of(context).size.height; // Untuk padding konten
+    final screenHeight = MediaQuery.of(context).size.height;
 
     const Color accentBlue = Color(0xFF3F51B5);
 
@@ -292,8 +295,7 @@ class _RegisterPageState extends State<RegisterPage> {
           borderSide: const BorderSide(color: accentBlue, width: 2),
         ),
         contentPadding: EdgeInsets.symmetric(
-            vertical: screenHeight * 0.015, // Padding vertikal dikurangi
-            horizontal: screenWidth * 0.03),
+            vertical: screenHeight * 0.015, horizontal: screenWidth * 0.03),
       ),
     );
   }
@@ -306,8 +308,7 @@ class _RegisterPageState extends State<RegisterPage> {
     required VoidCallback onToggleVisibility,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight =
-        MediaQuery.of(context).size.height; // Untuk padding konten
+    final screenHeight = MediaQuery.of(context).size.height;
 
     const Color accentBlue = Color(0xFF3F51B5);
 
@@ -334,8 +335,7 @@ class _RegisterPageState extends State<RegisterPage> {
           borderSide: const BorderSide(color: accentBlue, width: 2),
         ),
         contentPadding: EdgeInsets.symmetric(
-            vertical: screenHeight * 0.015, // Padding vertikal dikurangi
-            horizontal: screenWidth * 0.03),
+            vertical: screenHeight * 0.015, horizontal: screenWidth * 0.03),
         suffixIcon: IconButton(
           icon: Icon(
             isVisible ? Icons.visibility : Icons.visibility_off,
@@ -348,7 +348,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // Helper method untuk SizedBox sebagai spacer
+  // Helper method untuk SizedBox sebagai spacer (tidak digunakan jika pakai MainAxisAlignment.spaceEvenly)
   Widget _buildSpacer(double height) {
     return SizedBox(height: height);
   }
