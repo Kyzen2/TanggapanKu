@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tanggapanku/pages/profile_page.dart';
 
 class AkunPage extends StatelessWidget {
   const AkunPage({super.key});
@@ -31,24 +32,24 @@ class AkunPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  Row(
+                  const Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 24,
                         backgroundColor: Colors.grey,
                       ),
-                      const SizedBox(width: 14),
+                      SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Text(
+                            Text(
                               "Wendy Haryadi",
                               style: TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16),
                             ),
-                            const SizedBox(height: 3),
+                            SizedBox(height: 3),
                             Text(
                               "ID Layanan: 2241237",
                               style:
@@ -57,10 +58,10 @@ class AkunPage extends StatelessWidget {
                           ],
                         ),
                       ),
-                      const SizedBox(width: 10),
-                      const Icon(Icons.phone, size: 18),
-                      const SizedBox(width: 6),
-                      const Text(
+                      SizedBox(width: 10),
+                      Icon(Icons.phone, size: 18),
+                      SizedBox(width: 6),
+                      Text(
                         "+62 817-2345-4998",
                         style: TextStyle(fontSize: 13),
                       ),
@@ -84,8 +85,20 @@ class AkunPage extends StatelessWidget {
                               borderRadius: BorderRadius.circular(6)),
                         ),
                         onPressed: () {},
-                        child:
-                            const Text("maaf laptop aku kentang", style: TextStyle(fontSize: 13)),
+                        child: GestureDetector(
+                          onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                            builder: (context) => const ProfilePage(),
+                            ),
+                          );
+                          },
+                          child: const Text(
+                          "Edit Profil",
+                          style: TextStyle(fontSize: 13),
+                          ),
+                        ),
                       ),
                     ],
                   )
