@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:tanggapanku/pages/pengaduan.dart';
+
 
 class FloatingNav extends StatelessWidget {
   final int currentIndex;
@@ -11,20 +13,15 @@ class FloatingNav extends StatelessWidget {
   });
 
   @override
+  @override
   Widget build(BuildContext context) {
     return Container(
       height: 70,
-      margin: const EdgeInsets.only(left: 16, right: 16, bottom: 12),
       decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.95),
-        borderRadius: BorderRadius.circular(40),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black12.withOpacity(0.1),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        color: Colors.white,
+        border: const Border(
+          top: BorderSide(color: Colors.black12, width: 0.6),
+        ),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -32,44 +29,30 @@ class FloatingNav extends StatelessWidget {
           _buildNavItem(Icons.home_rounded, 0),
           _buildNavItem(Icons.chat_bubble_outline_rounded, 1),
 
-          // Tombol tengah add
-          Container(
-            width: 55,
-            height: 55,
-            decoration: BoxDecoration(
-              color: const Color(0xFF7D54DF),
-              shape: BoxShape.circle,
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0xFF7D54DF).withOpacity(0.4),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+          // tombol add tetap ada, tapi gak ngambang
+          InkWell(
+            borderRadius: BorderRadius.circular(30),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => PengaduanPage(),
                 ),
-              ],
-            ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(30),
-              onTap: () {
-                // aksi tombol add, misal buka modal
-                showDialog(
-                  context: context,
-                  builder: (_) => AlertDialog(
-                    title: const Text("Tambah Post"),
-                    content: const Text("Tombol Add ditekan!"),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Tutup"),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              child: const Icon(Icons.add, color: Colors.white, size: 30),
+              );
+            },
+            child: Container(
+              width: 48,
+              height: 48,
+              decoration: BoxDecoration(
+                color: const Color(0xFF7D54DF),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.add, color: Colors.white, size: 26),
             ),
           ),
 
-          _buildNavItem(Icons.notifications_none_rounded, 3),
+
+          _buildNavItem(Icons.history, 3),
           _buildNavItem(Icons.person_outline_rounded, 4),
         ],
       ),
@@ -110,8 +93,10 @@ String _getLabel(int index) {
       return "Beranda";
     case 1:
       return "Chat";
+    case 2:
+      return "Pengaduan";
     case 3:
-      return "Notif";
+      return "Riwayat";
     case 4:
       return "Profil";
     default:

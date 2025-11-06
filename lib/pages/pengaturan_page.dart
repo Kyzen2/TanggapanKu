@@ -77,7 +77,7 @@ class AkunPage extends StatelessWidget {
                       ),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryColor,
+                          backgroundColor: const Color.fromARGB(255, 255, 255, 255),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 18, vertical: 8),
                           shape: RoundedRectangleBorder(
@@ -85,7 +85,7 @@ class AkunPage extends StatelessWidget {
                         ),
                         onPressed: () {},
                         child:
-                            const Text("Edit", style: TextStyle(fontSize: 13)),
+                            const Text("maaf laptop aku kentang", style: TextStyle(fontSize: 13)),
                       ),
                     ],
                   )

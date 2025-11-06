@@ -57,35 +57,23 @@ class _TimelinePageState extends State<TimelinePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
-        children: [
-          // ✨ Tampilkan halaman sesuai index
-          _pages[_selectedIndex],
-
-          // ✨ Navbar animasi
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: AnimatedSlide(
-              duration: const Duration(milliseconds: 400),
-              offset: _navVisible ? Offset.zero : const Offset(0, 1.4),
-              curve: Curves.easeInOutCubicEmphasized,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 400),
-                opacity: _navVisible ? 1 : 0,
-                child: FloatingNav(
-                  currentIndex: _selectedIndex,
-                  onTap: _onNavTap,
-                ),
-              ),
-            ),
-          ),
-        ],
+  return Scaffold(
+    body: _pages[_selectedIndex], 
+    bottomNavigationBar: AnimatedSlide(
+      duration: const Duration(milliseconds: 400),
+      offset: _navVisible ? Offset.zero : const Offset(0, 1.4),
+      curve: Curves.easeInOutCubicEmphasized,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 400),
+        opacity: _navVisible ? 1 : 0,
+        child: FloatingNav(
+          currentIndex: _selectedIndex,
+          onTap: _onNavTap,
+        ),
       ),
-    );
-  }
+    ),
+  );
+}
 }
 
 // ✨ Widget terpisah untuk isi timeline
