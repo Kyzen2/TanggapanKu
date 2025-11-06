@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:tanggapanku/pages/dashbord.dart';
-// import 'timeline_page.dart';
+import 'package:tanggapanku/pages/login.dart';
+import 'timeline_page.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
