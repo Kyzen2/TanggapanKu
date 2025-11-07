@@ -2,10 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:gap/gap.dart';
+import 'package:tanggapanku/pages/riwayat_page.dart';
 import '../models/post.dart';
 import '../widgets/header_bar.dart';
 import '../widgets/post_card.dart';
 import '../widgets/bottom_nav.dart';
+import 'pengaduan.dart';
+import 'pengaturan_page.dart';
+import 'register.dart';
 
 class TimelinePage extends StatefulWidget {
   const TimelinePage({super.key});
@@ -16,8 +20,65 @@ class TimelinePage extends StatefulWidget {
 
 class _TimelinePageState extends State<TimelinePage> {
   int _selectedIndex = 0;
-  final ScrollController _scrollController = ScrollController();
   bool _navVisible = true;
+  final ScrollController _scrollController = ScrollController();
+
+  void _onNavTap(int index) {
+    setState(() => _selectedIndex = index);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.reverse) {
+        if (_navVisible) setState(() => _navVisible = false);
+      } else if (_scrollController.position.userScrollDirection ==
+          ScrollDirection.forward) {
+        if (!_navVisible) setState(() => _navVisible = true);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  final List<Widget> _pages = [
+    TimelinePageContent(), // timeline
+    const PengaduanPage(), // pengaduan
+    const RegisterPage(),   // register
+    const RiwayatPengaduanPage(), // pengaturan
+    const AkunPage(), // pengaturan
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+  return Scaffold(
+    body: _pages[_selectedIndex], 
+    bottomNavigationBar: AnimatedSlide(
+      duration: const Duration(milliseconds: 400),
+      offset: _navVisible ? Offset.zero : const Offset(0, 1.4),
+      curve: Curves.easeInOutCubicEmphasized,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 400),
+        opacity: _navVisible ? 1 : 0,
+        child: FloatingNav(
+          currentIndex: _selectedIndex,
+          onTap: _onNavTap,
+        ),
+      ),
+    ),
+  );
+}
+}
+
+// ✨ Widget terpisah untuk isi timeline
+class TimelinePageContent extends StatelessWidget {
+  TimelinePageContent({super.key});
 
   final List<Post> posts = [
     Post(
@@ -49,142 +110,93 @@ class _TimelinePageState extends State<TimelinePage> {
     ),
   ];
 
-  void _onNavTap(int index) => setState(() => _selectedIndex = index);
+  final List<String> sliderImages = [
+    'https://picsum.photos/seed/p4/600/360',
+    'https://picsum.photos/seed/p5/600/360',
+    'https://picsum.photos/seed/p1/600/360',
+  ];
 
-  @override
-  void initState() {
-    super.initState();
-    _scrollController.addListener(() {
-      if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.reverse) {
-        if (_navVisible) setState(() => _navVisible = false);
-      } else if (_scrollController.position.userScrollDirection ==
-          ScrollDirection.forward) {
-        if (!_navVisible) setState(() => _navVisible = true);
-      }
-    });
-  }
-
-  @override
-  void dispose() {
-    _scrollController.dispose();
-    super.dispose();
-  }
+  final ScrollController _scrollController = ScrollController();
 
   @override
   Widget build(BuildContext context) {
-    final List<String> sliderImages = [
-      'https://picsum.photos/seed/p4/600/360',
-      'https://picsum.photos/seed/p5/600/360',
-      'https://picsum.photos/seed/p1/600/360',
-    ];
+    return SafeArea(
+      child: CustomScrollView(
+        controller: _scrollController,
+        slivers: [
+          const SliverToBoxAdapter(child: HeaderBar()),
 
-    return Scaffold(
-      body: Stack(
-        children: [
-          // 🔹 Konten utama scrollable
-          SafeArea(
-            child: CustomScrollView(
-              controller: _scrollController,
-              slivers: [
-                const SliverToBoxAdapter(child: HeaderBar()),
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    child: CarouselSlider(
-                      options: CarouselOptions(
-                        height: 200,
-                        autoPlay: true,
-                        enlargeCenterPage: true,
-                        viewportFraction: 0.9,
-                        autoPlayInterval: const Duration(seconds: 5),
-                        autoPlayAnimationDuration:
-                            const Duration(milliseconds: 800),
-                      ),
-                      items: sliderImages.map((image) {
-                        return Builder(
-                          builder: (BuildContext context) {
-                            return ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Stack(
-                                fit: StackFit.expand,
-                                children: [
-                                  Image.network(image, fit: BoxFit.cover),
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.bottomCenter,
-                                        end: Alignment.topCenter,
-                                        colors: [
-                                          Colors.black.withOpacity(0.4),
-                                          Colors.transparent,
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
+          // carousel
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              child: CarouselSlider(
+                options: CarouselOptions(
+                  height: 200,
+                  autoPlay: true,
+                  enlargeCenterPage: true,
+                  viewportFraction: 0.9,
+                  autoPlayInterval: const Duration(seconds: 5),
+                  autoPlayAnimationDuration:
+                      const Duration(milliseconds: 800),
+                ),
+                items: sliderImages.map((image) {
+                  return Builder(
+                    builder: (BuildContext context) {
+                      return ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            Image.network(image, fit: BoxFit.cover),
+                            Container(
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  begin: Alignment.bottomCenter,
+                                  end: Alignment.topCenter,
+                                  colors: [
+                                    Colors.black.withOpacity(0.4),
+                                    Colors.transparent,
+                                  ],
+                                ),
                               ),
-                            );
-                          },
-                        );
-                      }).toList(),
-                    ),
-                  ),
-                ),
-
-                // 🔹 Post list
-                
-                // 🔹 Judul berita
-                SliverToBoxAdapter(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-                    child: Text(
-                      "Berita Terbaru",
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-
-                // 🔹 Post list
-                SliverList.separated(
-                  itemCount: posts.length,
-                  separatorBuilder: (_, __) => const Gap(8),
-                  itemBuilder: (context, index) => Padding(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-                    child: PostCard(post: posts[index]),
-                  ),
-                ),
-
-
-                // 🔹 sedikit ruang di bawah biar tidak ketutupan navbar
-                const SliverToBoxAdapter(child: SizedBox(height: 100)),
-              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  );
+                }).toList(),
+              ),
             ),
           ),
 
-          // 🔹 Navbar animasi (ngambang di atas konten)
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: AnimatedSlide(
-              duration: const Duration(milliseconds: 400),
-              offset: _navVisible ? Offset.zero : const Offset(0, 1.4),
-              curve: Curves.easeInOutCubicEmphasized,
-              child: AnimatedOpacity(
-                duration: const Duration(milliseconds: 400),
-                opacity: _navVisible ? 1 : 0,
-                child: FloatingNav(
-                  currentIndex: _selectedIndex,
-                  onTap: _onNavTap,
+          // judul berita
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: Text(
+                "Berita Terbaru",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
             ),
           ),
+
+          // post list
+          SliverList.separated(
+            itemCount: posts.length,
+            separatorBuilder: (_, __) => const Gap(8),
+            itemBuilder: (context, index) => Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+              child: PostCard(post: posts[index]),
+            ),
+          ),
+
+          // sedikit ruang di bawah biar tidak ketutupan navbar
+          const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
       ),
     );
