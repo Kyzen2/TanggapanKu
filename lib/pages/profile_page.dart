@@ -45,12 +45,12 @@ class ProfilePage extends StatelessWidget {
                         icon: Icons.arrow_back_ios_new_rounded,
                         onTap: () => Navigator.pop(context),
                       ),
-                      _circleButton(
-                        icon: Icons.settings_rounded,
-                        iconColor: purple,
-                        bgColor: purple.withOpacity(0.1),
-                        onTap: () {},
-                      ),
+                      // _circleButton(
+                      //   icon: Icons.settings_rounded,
+                      //   iconColor: purple,
+                      //   bgColor: purple.withOpacity(0.1),
+                      //   onTap: () {},
+                      // ),
                     ],
                   ),
                   const Gap(16),

@@ -72,7 +72,7 @@ class HeaderBar extends StatelessWidget {
           // ICON SETTINGS
           IconButton(
             onPressed: () {},
-            icon: const Icon(Icons.settings_rounded, color: Color(0xFF7D54DF)),
+            icon: const Icon(Icons.notifications_active, color: Color(0xFF7D54DF)),
           ),
         ],
       ),
