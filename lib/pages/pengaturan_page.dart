@@ -157,7 +157,7 @@ class AkunPage extends StatelessWidget {
           trailing: const Icon(Icons.chevron_right, size: 20),
           onTap: () {},
         ),
-        Divider(thickness: 0.8, height: 1),
+        const Divider(thickness: 0.8, height: 1),
       ],
     );
   }

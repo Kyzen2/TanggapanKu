@@ -172,9 +172,9 @@ class TimelinePageContent extends StatelessWidget {
           ),
 
           // judul berita
-          SliverToBoxAdapter(
+          const SliverToBoxAdapter(
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
               child: Text(
                 "Berita Terbaru",
                 style: TextStyle(
@@ -196,7 +196,7 @@ class TimelinePageContent extends StatelessWidget {
           ),
 
           // sedikit ruang di bawah biar tidak ketutupan navbar
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
+          const SliverToBoxAdapter(child: SizedBox(height: 50)),
         ],
       ),
     );
