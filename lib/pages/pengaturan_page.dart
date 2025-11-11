@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tanggapanku/pages/profile_page.dart';
+import 'package:tanggapanku/pages/timeline_page.dart';
 
 class AkunPage extends StatelessWidget {
   const AkunPage({super.key});
@@ -78,7 +79,8 @@ class AkunPage extends StatelessWidget {
                       ),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: const Color.fromARGB(255, 255, 255, 255),
+                          backgroundColor:
+                              const Color.fromARGB(255, 255, 255, 255),
                           padding: const EdgeInsets.symmetric(
                               horizontal: 18, vertical: 8),
                           shape: RoundedRectangleBorder(
@@ -87,16 +89,16 @@ class AkunPage extends StatelessWidget {
                         onPressed: () {},
                         child: GestureDetector(
                           onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                            builder: (context) => const ProfilePage(),
-                            ),
-                          );
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const ProfilePage(),
+                              ),
+                            );
                           },
                           child: const Text(
-                          "Edit Profil",
-                          style: TextStyle(fontSize: 13),
+                            "Edit Profil",
+                            style: TextStyle(fontSize: 13),
                           ),
                         ),
                       ),
@@ -116,12 +118,25 @@ class AkunPage extends StatelessWidget {
             const SizedBox(height: 16),
 
             // === Menu Items === //
-            _menuItem(Icons.person, "Informasi Data Pribadi"),
-            _menuItem(Icons.notifications, "Penyesuaian Notifikasi"),
-            _menuItem(Icons.article, "Syarat dan Ketentuan Aplikasi"),
-            _menuItem(Icons.menu_book, "Panduan Penggunaan Aplikasi"),
-            _menuItem(Icons.help_outline, "Pertanyaan Umum"),
-            _menuItem(Icons.settings, "Pengaturan Lainnya"),
+            _menuItem(context, Icons.person, "Informasi Data Pribadi", () {}),
+            _menuItem(
+                context, Icons.notifications, "Penyesuaian Notifikasi", () {}),
+            _menuItem(
+                context, Icons.article, "Syarat dan Ketentuan Aplikasi", () {}),
+            _menuItem(
+              context,
+              Icons.menu_book,
+              "Panduan Penggunaan Aplikasi",
+              () {
+                Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (_) => const TimelinePage(startTutorial: true),
+                  ),
+                );
+              },
+            ),
+            _menuItem(context, Icons.help_outline, "Pertanyaan Umum", () {}),
+            _menuItem(context, Icons.settings, "Pengaturan Lainnya", () {}),
 
             const SizedBox(height: 20),
 
@@ -144,7 +159,8 @@ class AkunPage extends StatelessWidget {
     );
   }
 
-  Widget _menuItem(IconData icon, String title) {
+  Widget _menuItem(
+      BuildContext context, IconData icon, String title, VoidCallback onTap) {
     return Column(
       children: [
         const SizedBox(height: 4),
@@ -155,7 +171,7 @@ class AkunPage extends StatelessWidget {
           leading: Icon(icon, size: 22, color: Colors.black87),
           title: Text(title, style: const TextStyle(fontSize: 15)),
           trailing: const Icon(Icons.chevron_right, size: 20),
-          onTap: () {},
+          onTap: onTap,
         ),
         const Divider(thickness: 0.8, height: 1),
       ],

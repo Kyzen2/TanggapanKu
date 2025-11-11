@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tanggapanku/api/api_service.dart';
+// adjust path as needed
+// Import your LoginPage below
+// import 'package:your_project/pages/login.dart';
 
 void main() {
   runApp(const MyApp());
@@ -8,18 +12,15 @@ void main() {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'TanggapanKu App',
+      title: 'TanggapanKu',
       theme: ThemeData(
         primarySwatch: Colors.blueGrey,
+        textTheme: GoogleFonts.poppinsTextTheme(),
         visualDensity: VisualDensity.adaptivePlatformDensity,
-        textTheme: GoogleFonts.poppinsTextTheme(
-          Theme.of(context).textTheme,
-        ),
       ),
       home: const RegisterPage(),
     );
@@ -28,38 +29,82 @@ class MyApp extends StatelessWidget {
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
-
   @override
   State<RegisterPage> createState() => _RegisterPageState();
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  final _nikController = TextEditingController();
+  final _namaController = TextEditingController();
+  final _noHpController = TextEditingController();
+  final _alamatController = TextEditingController();
+  final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
+
+  final ApiService _apiService = ApiService();
+
+  Future<void> _handleRegister() async {
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Password does not match confirmation!')),
+      );
+      return;
+    }
+    try {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (_) => const Center(child: CircularProgressIndicator()),
+      );
+      final result = await _apiService.registerUser(
+        nama: _namaController.text,
+        noHp: _noHpController.text,
+        nik: _nikController.text,
+        password: _passwordController.text,
+        alamat: _alamatController.text,
+      );
+      Navigator.of(context).pop(); // Remove loading
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Success'),
+          content: Text(result['message'] ?? 'Registration complete!'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                // Replace with your real LoginPage
+                // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginPage()));
+              },
+              child: const Text('OK'),
+            )
+          ],
+        ),
+      );
+    } catch (e) {
+      Navigator.of(context).pop(); // Remove loading
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Registration failed')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-
     const Color primaryBlueDark = Color(0xFF2C3E50);
     const Color accentBlue = Color(0xFF3F51B5);
-
-    // Tinggi yang diambil oleh keyboard.
-    // Kita akan menggunakan ini di SingleChildScrollView agar bagian bawah bisa discroll.
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final bool isKeyboardActive = keyboardHeight > 0;
-
     return Scaffold(
       backgroundColor: primaryBlueDark,
-      // Menggunakan SingleChildScrollView agar keseluruhan layar bisa di-scroll
-      // ketika keyboard muncul, mencegah overflow.
       body: SingleChildScrollView(
-        // Menambahkan Physics agar scroll tetap bisa terjadi meskipun kontennya pas
-        physics: const ClampingScrollPhysics(),
         child: Column(
           children: [
-            // Bagian atas
             Container(
               height: screenHeight * 0.35,
               width: screenWidth,
@@ -67,13 +112,8 @@ class _RegisterPageState extends State<RegisterPage> {
               child: Stack(
                 children: [
                   Positioned(
-                    // Mengubah posisi left agar responsif
-                    // Contoh: Ditempatkan di sekitar 55% dari lebar layar dari kiri
-                    // atau bisa juga dihitung dari kanan dengan right: screenWidth * -0.2 (jika ingin menjorok)
-                    // Saya akan membuatnya lebih dinamis
                     bottom: -screenHeight * 0.05,
-                    right: -screenWidth *
-                        0.1, // Geser sedikit ke kanan agar masuk layar
+                    right: -screenWidth * 0.1,
                     child: Image.asset(
                       'assets/egi.png',
                       height: screenHeight * 0.50,
@@ -101,7 +141,7 @@ class _RegisterPageState extends State<RegisterPage> {
                               'assets/Logo.png',
                               height: screenWidth * 0.05,
                               fit: BoxFit.contain,
-                            ),
+                            )
                           ],
                         ),
                         Text(
@@ -123,16 +163,12 @@ class _RegisterPageState extends State<RegisterPage> {
                         ),
                       ],
                     ),
-                  ),
+                  )
                 ],
               ),
             ),
-
-            // Bagian bawah dengan form register
             Container(
               width: screenWidth,
-              // Tinggi dihitung agar mengisi sisa ruang,
-              // namun tetap mempertimbangkan keyboard jika aktif
               height: (screenHeight * 0.65) -
                   (isKeyboardActive ? keyboardHeight : 0),
               color: Colors.white,
@@ -141,38 +177,38 @@ class _RegisterPageState extends State<RegisterPage> {
                   vertical: screenHeight * 0.02),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                // Gunakan MainAxisAlignment.spaceEvenly atau .start dengan spacer manual
-                // agar lebih terkontrol saat keyboard muncul
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _buildTextField(
                     context,
-                    hintText: 'NIK',
+                    label: 'NIK',
                     icon: Icons.person,
-                    keyboardType: TextInputType.number,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                    controller: _nikController,
+                    keyboardType: TextInputType.text,
                   ),
-                  // _buildSpacer(screenHeight * 0.015), // Hapus spacer jika pakai spaceEvenly
-
                   _buildTextField(
                     context,
-                    hintText: 'Nama Lengkap',
+                    label: 'Nama Lengkap',
                     icon: Icons.person,
+                    controller: _namaController,
                   ),
-                  // _buildSpacer(screenHeight * 0.015),
-
                   _buildTextField(
                     context,
-                    hintText: 'No Whatsapp',
+                    label: 'No Whatsapp',
                     icon: Icons.phone,
+                    controller: _noHpController,
                     keyboardType: TextInputType.phone,
-                    inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   ),
-                  // _buildSpacer(screenHeight * 0.015),
-
+                  _buildTextField(
+                    context,
+                    label: 'Alamat',
+                    icon: Icons.location_on,
+                    controller: _alamatController,
+                  ),
                   _buildPasswordField(
                     context,
-                    hintText: 'Password',
+                    label: 'Password',
+                    controller: _passwordController,
                     isVisible: _isPasswordVisible,
                     onToggleVisibility: () {
                       setState(() {
@@ -180,11 +216,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       });
                     },
                   ),
-                  // _buildSpacer(screenHeight * 0.015),
-
                   _buildPasswordField(
                     context,
-                    hintText: 'Ulangi Password',
+                    label: 'Ulangi Password',
+                    controller: _confirmPasswordController,
                     isVisible: _isConfirmPasswordVisible,
                     onToggleVisibility: () {
                       setState(() {
@@ -192,14 +227,10 @@ class _RegisterPageState extends State<RegisterPage> {
                       });
                     },
                   ),
-                  // _buildSpacer(screenHeight * 0.025),
-
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Handle Register
-                      },
+                      onPressed: _handleRegister,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: accentBlue,
                         shape: RoundedRectangleBorder(
@@ -218,8 +249,6 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                   ),
-                  // _buildSpacer(screenHeight * 0.02),
-
                   Padding(
                     padding:
                         EdgeInsets.symmetric(horizontal: screenWidth * 0.05),
@@ -227,8 +256,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       textAlign: TextAlign.center,
                       text: TextSpan(
                         style: GoogleFonts.poppins(
-                            fontSize: screenWidth * 0.03,
-                            color: Colors.grey[600]),
+                          fontSize: screenWidth * 0.03,
+                          color: Colors.grey[600],
+                        ),
                         children: <TextSpan>[
                           const TextSpan(text: 'Dengan ini saya menyetujui\n'),
                           TextSpan(
@@ -259,24 +289,22 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // Helper method untuk TextField umum
+  // Reusable helper for textfields
   Widget _buildTextField(
     BuildContext context, {
-    required String hintText,
+    required String label,
     required IconData icon,
+    required TextEditingController controller,
     TextInputType keyboardType = TextInputType.text,
-    List<TextInputFormatter>? inputFormatters,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
     const Color accentBlue = Color(0xFF3F51B5);
-
     return TextField(
+      controller: controller,
       keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
       decoration: InputDecoration(
-        hintText: hintText,
+        hintText: label,
         hintStyle: GoogleFonts.poppins(
             color: Colors.grey[600], fontSize: screenWidth * 0.04),
         filled: true,
@@ -300,22 +328,22 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // Helper method untuk PasswordField
+  // Reusable helper for password
   Widget _buildPasswordField(
     BuildContext context, {
-    required String hintText,
+    required String label,
+    required TextEditingController controller,
     required bool isVisible,
     required VoidCallback onToggleVisibility,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-
     const Color accentBlue = Color(0xFF3F51B5);
-
     return TextField(
+      controller: controller,
       obscureText: !isVisible,
       decoration: InputDecoration(
-        hintText: hintText,
+        hintText: label,
         hintStyle: GoogleFonts.poppins(
             color: Colors.grey[600], fontSize: screenWidth * 0.04),
         filled: true,
@@ -347,38 +375,5 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
-
-  // Helper method untuk SizedBox sebagai spacer (tidak digunakan jika pakai MainAxisAlignment.spaceEvenly)
-  Widget _buildSpacer(double height) {
-    return SizedBox(height: height);
-  }
 }
 
-// CustomClipper untuk membuat bentuk gelombang (tidak digunakan)
-class WaveClipper extends CustomClipper<Path> {
-  @override
-  Path getClip(Size size) {
-    var path = Path();
-    path.lineTo(0, size.height * 0.8);
-
-    var firstControlPoint = Offset(size.width * 0.25, size.height);
-    var firstEndPoint = Offset(size.width * 0.5, size.height * 0.8);
-    path.quadraticBezierTo(firstControlPoint.dx, firstControlPoint.dy,
-        firstEndPoint.dx, firstEndPoint.dy);
-
-    var secondControlPoint = Offset(size.width * 0.75, size.height * 0.6);
-    var secondEndPoint = Offset(size.width, size.height * 0.75);
-    path.quadraticBezierTo(secondControlPoint.dx, secondControlPoint.dy,
-        secondEndPoint.dx, secondEndPoint.dy);
-
-    path.lineTo(size.width, 0);
-    path.close();
-
-    return path;
-  }
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) {
-    return false;
-  }
-}
