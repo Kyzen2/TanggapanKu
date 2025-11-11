@@ -2,30 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tanggapanku/api/api_service.dart';
-// adjust path as needed
-// Import your LoginPage below
-// import 'package:your_project/pages/login.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'TanggapanKu',
-      theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
-        textTheme: GoogleFonts.poppinsTextTheme(),
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const RegisterPage(),
-    );
-  }
-}
+import 'package:tanggapanku/pages/region_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -44,7 +21,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
-  final ApiService _apiService = ApiService();
+  final ApiServiceRegister _apiService = ApiServiceRegister();
 
   Future<void> _handleRegister() async {
     if (_passwordController.text != _confirmPasswordController.text) {
@@ -76,7 +53,6 @@ class _RegisterPageState extends State<RegisterPage> {
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Replace with your real LoginPage
                 // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginPage()));
               },
               child: const Text('OK'),
@@ -87,7 +63,7 @@ class _RegisterPageState extends State<RegisterPage> {
     } catch (e) {
       Navigator.of(context).pop(); // Remove loading
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed')),
+        const SnackBar(content: Text('Registration failed')),
       );
     }
   }
@@ -100,11 +76,13 @@ class _RegisterPageState extends State<RegisterPage> {
     const Color accentBlue = Color(0xFF3F51B5);
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final bool isKeyboardActive = keyboardHeight > 0;
+
     return Scaffold(
       backgroundColor: primaryBlueDark,
       body: SingleChildScrollView(
         child: Column(
           children: [
+            // Header
             Container(
               height: screenHeight * 0.35,
               width: screenWidth,
@@ -167,6 +145,8 @@ class _RegisterPageState extends State<RegisterPage> {
                 ],
               ),
             ),
+
+            // Form
             Container(
               width: screenWidth,
               height: (screenHeight * 0.65) -
@@ -205,6 +185,31 @@ class _RegisterPageState extends State<RegisterPage> {
                     icon: Icons.location_on,
                     controller: _alamatController,
                   ),
+
+                  // === Tombol Pilih Region ===
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.map_outlined),
+                      label: Text(
+                        'Pilih Region',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          color: accentBlue,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const RegionListPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  // =============================
+
                   _buildPasswordField(
                     context,
                     label: 'Password',
@@ -289,7 +294,7 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // Reusable helper for textfields
+  // ===== Helper Widgets (tidak berubah) =====
   Widget _buildTextField(
     BuildContext context, {
     required String label,
@@ -318,9 +323,9 @@ class _RegisterPageState extends State<RegisterPage> {
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.grey.shade400),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: accentBlue, width: 2),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          borderSide: BorderSide(color: accentBlue, width: 2),
         ),
         contentPadding: EdgeInsets.symmetric(
             vertical: screenHeight * 0.015, horizontal: screenWidth * 0.03),
@@ -328,7 +333,6 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 
-  // Reusable helper for password
   Widget _buildPasswordField(
     BuildContext context, {
     required String label,
@@ -358,9 +362,9 @@ class _RegisterPageState extends State<RegisterPage> {
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide(color: Colors.grey.shade400),
         ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: accentBlue, width: 2),
+        focusedBorder: const OutlineInputBorder(
+          borderRadius: BorderRadius.all(Radius.circular(10)),
+          borderSide: BorderSide(color: accentBlue, width: 2),
         ),
         contentPadding: EdgeInsets.symmetric(
             vertical: screenHeight * 0.015, horizontal: screenWidth * 0.03),
@@ -376,4 +380,3 @@ class _RegisterPageState extends State<RegisterPage> {
     );
   }
 }
-
