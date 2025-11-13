@@ -11,8 +11,12 @@ import '../widgets/bottom_nav.dart';
 import 'pengaduan.dart';
 import 'pengaturan_page.dart';
 import 'register.dart';
+import 'riwayat_page.dart';
 
 class TimelinePage extends StatefulWidget {
+  final Map<String, dynamic> userData; // <-- data user dari login
+
+  const TimelinePage({super.key, required this.userData});
   final bool startTutorial;
   const TimelinePage({super.key, this.startTutorial = false});
 
@@ -171,29 +175,19 @@ class _TimelinePageState extends State<TimelinePage> {
     super.dispose();
   }
 
-  final List<Widget> _pages = [];
-
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_pages.isEmpty) {
-      _pages.addAll([
-        TimelinePageContent(
-            keyCarousel: keyCarousel, scrollController: _scrollController),
-        const PengaduanPage(),
-        const RegisterPage(),
-        const RiwayatPengaduanPage(),
-        const AkunPage(),
-      ]);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _pages = [
+      TimelinePageContent(userName: widget.userData['name']), // kirim nama user
+      const PengaduanPage(),
+      const RegisterPage(),
+      const RiwayatPengaduanPage(),
+      const AkunPage(),
+    ];
+
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: AnimatedSlide(
-        key: keyNavBar, // Tambahkan global key di nav
         duration: const Duration(milliseconds: 400),
         offset: _navVisible ? Offset.zero : const Offset(0, 1.4),
         curve: Curves.easeInOutCubicEmphasized,
@@ -212,6 +206,8 @@ class _TimelinePageState extends State<TimelinePage> {
 
 // Widget untuk isi halaman timeline
 class TimelinePageContent extends StatelessWidget {
+  final String userName;
+  TimelinePageContent({super.key, required this.userName});
   final GlobalKey keyCarousel;
   final ScrollController scrollController;
   TimelinePageContent(
@@ -259,7 +255,10 @@ class TimelinePageContent extends StatelessWidget {
       child: CustomScrollView(
         controller: scrollController,
         slivers: [
-          const SliverToBoxAdapter(child: HeaderBar()),
+          // HeaderBar dengan nama user
+          SliverToBoxAdapter(
+            child: HeaderBar(userName: userName),
+          ),
 
           // carousel
           SliverToBoxAdapter(
