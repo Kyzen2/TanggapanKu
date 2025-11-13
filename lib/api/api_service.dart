@@ -57,35 +57,25 @@ class ApiService {
 
 // Class ApiService baru dengan request registerUser menggunakan POST, dan parameter tambahan 'region'
 class ApiServiceRegister {
-  final String baseUrl = 'https://firmly-splendid-dove.ngrok-free.app/api';
+  final String _baseUrl = "URL_API_TUJUAN"; // Ganti dengan URL API yang sesuai
 
-  Future<Map<String, dynamic>> registerUser({
-    required String nama,
-    required String noHp,
-    required String nik,
-    required String password,
-    required String alamat, // parameter tambahan
-  }) async {
-    final url = Uri.parse('$baseUrl/register');
-    final response = await http.post(
-      url,
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json', // Menambahkan header Accept
-      },
-      body: jsonEncode({
-        "nama": nama,
-        "no_hp": noHp,
-        "nik": nik,
-        "password": password,
-        "alamat": alamat,
-      }),
-    );
-    if (response.statusCode == 200) {
-      return json.decode(response.body);
-    } else {
-      throw Exception(
-          'Registration failed: ${response.statusCode} ${response.body}');
+  Future<Map<String, dynamic>> registerUser(Map<String, dynamic> data) async {
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/register'), // Endpoint untuk register
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode(data), // Data dikirim dalam format JSON
+      );
+
+      if (response.statusCode == 200) {
+        // Jika response berhasil
+        return jsonDecode(response.body);
+      } else {
+        // Jika response gagal
+        throw Exception('Failed to register');
+      }
+    } catch (e) {
+      throw Exception('Failed to connect to API');
     }
   }
 }
