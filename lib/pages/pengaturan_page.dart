@@ -130,7 +130,7 @@ class AkunPage extends StatelessWidget {
               () {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                    builder: (_) => const TimelinePage(startTutorial: true),
+                    builder: (_) => const TimelinePage(startTutorial: true, userData: {},),
                   ),
                 );
               },

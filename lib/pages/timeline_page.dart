@@ -16,9 +16,8 @@ import 'riwayat_page.dart';
 class TimelinePage extends StatefulWidget {
   final Map<String, dynamic> userData; // <-- data user dari login
 
-  const TimelinePage({super.key, required this.userData});
   final bool startTutorial;
-  const TimelinePage({super.key, this.startTutorial = false});
+  const TimelinePage({super.key, this.startTutorial = false, required this.userData});
 
   @override
   State<TimelinePage> createState() => _TimelinePageState();
@@ -178,7 +177,7 @@ class _TimelinePageState extends State<TimelinePage> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> _pages = [
-      TimelinePageContent(userName: widget.userData['name']), // kirim nama user
+      TimelinePageContent(userName: widget.userData['name'], keyCarousel: keyCarousel, scrollController: _scrollController,), // kirim nama user
       const PengaduanPage(),
       const RegisterPage(),
       const RiwayatPengaduanPage(),
@@ -207,11 +206,10 @@ class _TimelinePageState extends State<TimelinePage> {
 // Widget untuk isi halaman timeline
 class TimelinePageContent extends StatelessWidget {
   final String userName;
-  TimelinePageContent({super.key, required this.userName});
   final GlobalKey keyCarousel;
   final ScrollController scrollController;
   TimelinePageContent(
-      {super.key, required this.keyCarousel, required this.scrollController});
+      {super.key, required this.keyCarousel, required this.scrollController, required this.userName});
 
   final List<Post> posts = [
     Post(
