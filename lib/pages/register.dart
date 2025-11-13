@@ -2,30 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tanggapanku/api/api_service.dart';
-// adjust path as needed
-// Import your LoginPage below
-// import 'package:your_project/pages/login.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'TanggapanKu',
-      theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
-        textTheme: GoogleFonts.poppinsTextTheme(),
-        visualDensity: VisualDensity.adaptivePlatformDensity,
-      ),
-      home: const RegisterPage(),
-    );
-  }
-}
+import 'package:tanggapanku/models/register.dart';
+import 'package:tanggapanku/pages/region_page.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -44,7 +22,7 @@ class _RegisterPageState extends State<RegisterPage> {
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
-  final ApiService _apiService = ApiService();
+  final ApiServiceRegister _apiService = ApiServiceRegister();
 
   Future<void> _handleRegister() async {
     if (_passwordController.text != _confirmPasswordController.text) {
@@ -59,24 +37,32 @@ class _RegisterPageState extends State<RegisterPage> {
         barrierDismissible: false,
         builder: (_) => const Center(child: CircularProgressIndicator()),
       );
-      final result = await _apiService.registerUser(
+
+      // Membuat objek Warga dengan data yang diinputkan oleh user
+      Warga warga = Warga(
         nama: _namaController.text,
         noHp: _noHpController.text,
         nik: _nikController.text,
         password: _passwordController.text,
         alamat: _alamatController.text,
       );
-      Navigator.of(context).pop(); // Remove loading
+
+      // Membuat objek Register dengan data Warga
+      Register registerData = Register(warga: warga);
+
+      // Kirim data register ke API menggunakan fungsi registerUser
+      final result = await _apiService.registerUser(registerData.toJson());
+
+      Navigator.of(context).pop(); // Remove loading dialog
       showDialog(
         context: context,
         builder: (context) => AlertDialog(
           title: const Text('Success'),
-          content: Text(result['message'] ?? 'Registration complete!'),
+          content: Text(result['message'] ?? 'Registrasi Berhasil!'),
           actions: [
             TextButton(
               onPressed: () {
                 Navigator.of(context).pop();
-                // Replace with your real LoginPage
                 // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginPage()));
               },
               child: const Text('OK'),
@@ -85,9 +71,9 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
       );
     } catch (e) {
-      Navigator.of(context).pop(); // Remove loading
+      Navigator.of(context).pop(); // Remove loading dialog
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registration failed')),
+        const SnackBar(content: Text('Registrasi Gagal')),
       );
     }
   }
@@ -100,11 +86,14 @@ class _RegisterPageState extends State<RegisterPage> {
     const Color accentBlue = Color(0xFF3F51B5);
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
     final bool isKeyboardActive = keyboardHeight > 0;
+
     return Scaffold(
       backgroundColor: primaryBlueDark,
       body: SingleChildScrollView(
+        // Ensuring the entire content can scroll
         child: Column(
           children: [
+            // Header
             Container(
               height: screenHeight * 0.35,
               width: screenWidth,
@@ -167,17 +156,16 @@ class _RegisterPageState extends State<RegisterPage> {
                 ],
               ),
             ),
+
+            // Form
             Container(
               width: screenWidth,
-              height: (screenHeight * 0.65) -
-                  (isKeyboardActive ? keyboardHeight : 0),
               color: Colors.white,
               padding: EdgeInsets.symmetric(
                   horizontal: screenWidth * 0.07,
                   vertical: screenHeight * 0.02),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _buildTextField(
                     context,
@@ -186,12 +174,14 @@ class _RegisterPageState extends State<RegisterPage> {
                     controller: _nikController,
                     keyboardType: TextInputType.text,
                   ),
+                  SizedBox(height: screenHeight * 0.02),
                   _buildTextField(
                     context,
                     label: 'Nama Lengkap',
                     icon: Icons.person,
                     controller: _namaController,
                   ),
+                  SizedBox(height: screenHeight * 0.02),
                   _buildTextField(
                     context,
                     label: 'No Whatsapp',
@@ -199,12 +189,39 @@ class _RegisterPageState extends State<RegisterPage> {
                     controller: _noHpController,
                     keyboardType: TextInputType.phone,
                   ),
+                  SizedBox(height: screenHeight * 0.02),
                   _buildTextField(
                     context,
                     label: 'Alamat',
                     icon: Icons.location_on,
                     controller: _alamatController,
                   ),
+                  SizedBox(height: screenHeight * 0.03),
+
+                  // Tombol Pilih Region
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      icon: const Icon(Icons.map_outlined),
+                      label: Text(
+                        'Pilih Region',
+                        style: GoogleFonts.poppins(
+                          fontWeight: FontWeight.w600,
+                          color: accentBlue,
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const RegionListPage(),
+                          ),
+                        );
+                      },
+                    ),
+                  ),
+                  SizedBox(height: screenHeight * 0.03),
+
                   _buildPasswordField(
                     context,
                     label: 'Password',
@@ -216,6 +233,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       });
                     },
                   ),
+                  SizedBox(height: screenHeight * 0.02),
                   _buildPasswordField(
                     context,
                     label: 'Ulangi Password',
@@ -227,6 +245,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       });
                     },
                   ),
+                  SizedBox(height: screenHeight * 0.05),
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
@@ -288,92 +307,90 @@ class _RegisterPageState extends State<RegisterPage> {
       ),
     );
   }
-
-  // Reusable helper for textfields
-  Widget _buildTextField(
-    BuildContext context, {
-    required String label,
-    required IconData icon,
-    required TextEditingController controller,
-    TextInputType keyboardType = TextInputType.text,
-  }) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    const Color accentBlue = Color(0xFF3F51B5);
-    return TextField(
-      controller: controller,
-      keyboardType: keyboardType,
-      decoration: InputDecoration(
-        hintText: label,
-        hintStyle: GoogleFonts.poppins(
-            color: Colors.grey[600], fontSize: screenWidth * 0.04),
-        filled: true,
-        fillColor: Colors.white,
-        prefixIcon: Icon(icon, color: Colors.grey, size: screenWidth * 0.06),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade400),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade400),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: accentBlue, width: 2),
-        ),
-        contentPadding: EdgeInsets.symmetric(
-            vertical: screenHeight * 0.015, horizontal: screenWidth * 0.03),
-      ),
-    );
-  }
-
-  // Reusable helper for password
-  Widget _buildPasswordField(
-    BuildContext context, {
-    required String label,
-    required TextEditingController controller,
-    required bool isVisible,
-    required VoidCallback onToggleVisibility,
-  }) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-    const Color accentBlue = Color(0xFF3F51B5);
-    return TextField(
-      controller: controller,
-      obscureText: !isVisible,
-      decoration: InputDecoration(
-        hintText: label,
-        hintStyle: GoogleFonts.poppins(
-            color: Colors.grey[600], fontSize: screenWidth * 0.04),
-        filled: true,
-        fillColor: Colors.white,
-        prefixIcon:
-            Icon(Icons.lock, color: Colors.grey, size: screenWidth * 0.06),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade400),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: Colors.grey.shade400),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: const BorderSide(color: accentBlue, width: 2),
-        ),
-        contentPadding: EdgeInsets.symmetric(
-            vertical: screenHeight * 0.015, horizontal: screenWidth * 0.03),
-        suffixIcon: IconButton(
-          icon: Icon(
-            isVisible ? Icons.visibility : Icons.visibility_off,
-            color: Colors.grey,
-            size: screenWidth * 0.06,
-          ),
-          onPressed: onToggleVisibility,
-        ),
-      ),
-    );
-  }
 }
 
+// ===== Helper Widgets (tidak berubah) =====
+Widget _buildTextField(
+  BuildContext context, {
+  required String label,
+  required IconData icon,
+  required TextEditingController controller,
+  TextInputType keyboardType = TextInputType.text,
+}) {
+  final screenWidth = MediaQuery.of(context).size.width;
+  final screenHeight = MediaQuery.of(context).size.height;
+  const Color accentBlue = Color(0xFF3F51B5);
+  return TextField(
+    controller: controller,
+    keyboardType: keyboardType,
+    decoration: InputDecoration(
+      hintText: label,
+      hintStyle: GoogleFonts.poppins(
+          color: Colors.grey[600], fontSize: screenWidth * 0.04),
+      filled: true,
+      fillColor: Colors.white,
+      prefixIcon: Icon(icon, color: Colors.grey, size: screenWidth * 0.06),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.grey.shade400),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.grey.shade400),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+        borderSide: BorderSide(color: accentBlue, width: 2),
+      ),
+      contentPadding: EdgeInsets.symmetric(
+          vertical: screenHeight * 0.015, horizontal: screenWidth * 0.03),
+    ),
+  );
+}
+
+Widget _buildPasswordField(
+  BuildContext context, {
+  required String label,
+  required TextEditingController controller,
+  required bool isVisible,
+  required VoidCallback onToggleVisibility,
+}) {
+  final screenWidth = MediaQuery.of(context).size.width;
+  final screenHeight = MediaQuery.of(context).size.height;
+  const Color accentBlue = Color(0xFF3F51B5);
+  return TextField(
+    controller: controller,
+    obscureText: !isVisible,
+    decoration: InputDecoration(
+      hintText: label,
+      hintStyle: GoogleFonts.poppins(
+          color: Colors.grey[600], fontSize: screenWidth * 0.04),
+      filled: true,
+      fillColor: Colors.white,
+      prefixIcon:
+          Icon(Icons.lock, color: Colors.grey, size: screenWidth * 0.06),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.grey.shade400),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(10),
+        borderSide: BorderSide(color: Colors.grey.shade400),
+      ),
+      focusedBorder: const OutlineInputBorder(
+        borderRadius: BorderRadius.all(Radius.circular(10)),
+        borderSide: BorderSide(color: accentBlue, width: 2),
+      ),
+      contentPadding: EdgeInsets.symmetric(
+          vertical: screenHeight * 0.015, horizontal: screenWidth * 0.03),
+      suffixIcon: IconButton(
+        icon: Icon(
+          isVisible ? Icons.visibility : Icons.visibility_off,
+          color: Colors.grey,
+          size: screenWidth * 0.06,
+        ),
+        onPressed: onToggleVisibility,
+      ),
+    ),
+  );
+}
