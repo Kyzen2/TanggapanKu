@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:gap/gap.dart';
-import 'package:tanggapanku/pages/riwayat_page.dart';
 import '../models/post.dart';
 import '../widgets/header_bar.dart';
 import '../widgets/post_card.dart';
@@ -10,9 +9,12 @@ import '../widgets/bottom_nav.dart';
 import 'pengaduan.dart';
 import 'pengaturan_page.dart';
 import 'register.dart';
+import 'riwayat_page.dart';
 
 class TimelinePage extends StatefulWidget {
-  const TimelinePage({super.key});
+  final Map<String, dynamic> userData; // <-- data user dari login
+
+  const TimelinePage({super.key, required this.userData});
 
   @override
   State<TimelinePage> createState() => _TimelinePageState();
@@ -47,38 +49,39 @@ class _TimelinePageState extends State<TimelinePage> {
     super.dispose();
   }
 
-  final List<Widget> _pages = [
-    TimelinePageContent(), // timeline
-    const PengaduanPage(), // pengaduan
-    const RegisterPage(),   // register
-    const RiwayatPengaduanPage(), // pengaturan
-    const AkunPage(), // pengaturan
-  ];
-
   @override
   Widget build(BuildContext context) {
-  return Scaffold(
-    body: _pages[_selectedIndex], 
-    bottomNavigationBar: AnimatedSlide(
-      duration: const Duration(milliseconds: 400),
-      offset: _navVisible ? Offset.zero : const Offset(0, 1.4),
-      curve: Curves.easeInOutCubicEmphasized,
-      child: AnimatedOpacity(
+    final List<Widget> _pages = [
+      TimelinePageContent(userName: widget.userData['name']), // kirim nama user
+      const PengaduanPage(),
+      const RegisterPage(),
+      const RiwayatPengaduanPage(),
+      const AkunPage(),
+    ];
+
+    return Scaffold(
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: AnimatedSlide(
         duration: const Duration(milliseconds: 400),
-        opacity: _navVisible ? 1 : 0,
-        child: FloatingNav(
-          currentIndex: _selectedIndex,
-          onTap: _onNavTap,
+        offset: _navVisible ? Offset.zero : const Offset(0, 1.4),
+        curve: Curves.easeInOutCubicEmphasized,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 400),
+          opacity: _navVisible ? 1 : 0,
+          child: FloatingNav(
+            currentIndex: _selectedIndex,
+            onTap: _onNavTap,
+          ),
         ),
       ),
-    ),
-  );
-}
+    );
+  }
 }
 
 // ✨ Widget terpisah untuk isi timeline
 class TimelinePageContent extends StatelessWidget {
-  TimelinePageContent({super.key});
+  final String userName;
+  TimelinePageContent({super.key, required this.userName});
 
   final List<Post> posts = [
     Post(
@@ -124,7 +127,10 @@ class TimelinePageContent extends StatelessWidget {
       child: CustomScrollView(
         controller: _scrollController,
         slivers: [
-          const SliverToBoxAdapter(child: HeaderBar()),
+          // HeaderBar dengan nama user
+          SliverToBoxAdapter(
+            child: HeaderBar(userName: userName),
+          ),
 
           // carousel
           SliverToBoxAdapter(
@@ -137,8 +143,7 @@ class TimelinePageContent extends StatelessWidget {
                   enlargeCenterPage: true,
                   viewportFraction: 0.9,
                   autoPlayInterval: const Duration(seconds: 5),
-                  autoPlayAnimationDuration:
-                      const Duration(milliseconds: 800),
+                  autoPlayAnimationDuration: const Duration(milliseconds: 800),
                 ),
                 items: sliderImages.map((image) {
                   return Builder(
