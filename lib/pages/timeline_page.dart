@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:gap/gap.dart';
+import 'package:tanggapanku/pages/riwayat_page.dart';
+import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../models/post.dart';
 import '../widgets/header_bar.dart';
 import '../widgets/post_card.dart';
@@ -15,6 +17,8 @@ class TimelinePage extends StatefulWidget {
   final Map<String, dynamic> userData; // <-- data user dari login
 
   const TimelinePage({super.key, required this.userData});
+  final bool startTutorial;
+  const TimelinePage({super.key, this.startTutorial = false});
 
   @override
   State<TimelinePage> createState() => _TimelinePageState();
@@ -24,6 +28,12 @@ class _TimelinePageState extends State<TimelinePage> {
   int _selectedIndex = 0;
   bool _navVisible = true;
   final ScrollController _scrollController = ScrollController();
+
+  /// Tambahkan global key untuk tutorial
+  final GlobalKey keyCarousel = GlobalKey();
+  final GlobalKey keyNavBar = GlobalKey();
+  TutorialCoachMark? tutorialCoachMark;
+  List<TargetFocus> targets = [];
 
   void _onNavTap(int index) {
     setState(() => _selectedIndex = index);
@@ -41,6 +51,122 @@ class _TimelinePageState extends State<TimelinePage> {
         if (!_navVisible) setState(() => _navVisible = true);
       }
     });
+    if (widget.startTutorial) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        showTutorial();
+      });
+    }
+  }
+
+  void showTutorial() {
+    targets = [
+      TargetFocus(
+        identify: "Carousel",
+        keyTarget: keyCarousel,
+        contents: [
+          TargetContent(
+            align: ContentAlign.bottom,
+            builder: (context, controller) => Center(
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.82,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.25),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Panduan Slider Utama",
+                      style: TextStyle(
+                        color: Color(0xFF2C2C6B),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      "Slide ini menampilkan berita-berita utama dan pengumuman penting. Geser ke kiri atau kanan untuk melihat lebih banyak informasi.",
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+      TargetFocus(
+        identify: "NavBar",
+        keyTarget: keyNavBar,
+        contents: [
+          TargetContent(
+            align: ContentAlign.top,
+            builder: (context, controller) => Center(
+              child: Container(
+                width: MediaQuery.of(context).size.width * 0.82,
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(18),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.25),
+                      blurRadius: 16,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: const Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      "Navigation Bar",
+                      style: TextStyle(
+                        color: Color(0xFF2C2C6B),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      "Gunakan tombol bawah ini untuk berpindah halaman dengan cepat: Home, Pengaduan, Register, Riwayat, dan Akun.",
+                      style: TextStyle(
+                        color: Colors.black87,
+                        fontSize: 16,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    ];
+
+    tutorialCoachMark = TutorialCoachMark(
+      targets: targets,
+      colorShadow: Colors.black.withOpacity(0.6),
+      paddingFocus: 10,
+      textSkip: "Lewati",
+      onFinish: () {},
+      onSkip: () { return true; },
+    );
+    tutorialCoachMark?.show(context: context);
   }
 
   @override
@@ -78,10 +204,14 @@ class _TimelinePageState extends State<TimelinePage> {
   }
 }
 
-// ✨ Widget terpisah untuk isi timeline
+// Widget untuk isi halaman timeline
 class TimelinePageContent extends StatelessWidget {
   final String userName;
   TimelinePageContent({super.key, required this.userName});
+  final GlobalKey keyCarousel;
+  final ScrollController scrollController;
+  TimelinePageContent(
+      {super.key, required this.keyCarousel, required this.scrollController});
 
   final List<Post> posts = [
     Post(
@@ -119,13 +249,11 @@ class TimelinePageContent extends StatelessWidget {
     'https://picsum.photos/seed/p1/600/360',
   ];
 
-  final ScrollController _scrollController = ScrollController();
-
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: CustomScrollView(
-        controller: _scrollController,
+        controller: scrollController,
         slivers: [
           // HeaderBar dengan nama user
           SliverToBoxAdapter(
@@ -137,6 +265,7 @@ class TimelinePageContent extends StatelessWidget {
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 10),
               child: CarouselSlider(
+                key: keyCarousel, // pasang key tutorial
                 options: CarouselOptions(
                   height: 200,
                   autoPlay: true,
@@ -176,7 +305,6 @@ class TimelinePageContent extends StatelessWidget {
             ),
           ),
 
-          // judul berita
           const SliverToBoxAdapter(
             child: Padding(
               padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
@@ -190,7 +318,6 @@ class TimelinePageContent extends StatelessWidget {
             ),
           ),
 
-          // post list
           SliverList.separated(
             itemCount: posts.length,
             separatorBuilder: (_, __) => const Gap(8),
@@ -199,9 +326,7 @@ class TimelinePageContent extends StatelessWidget {
               child: PostCard(post: posts[index]),
             ),
           ),
-
-          // sedikit ruang di bawah biar tidak ketutupan navbar
-          const SliverToBoxAdapter(child: SizedBox(height: 50)),
+          const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
       ),
     );

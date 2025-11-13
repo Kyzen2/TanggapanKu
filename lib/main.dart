@@ -2,6 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tanggapanku/models/register.dart';
+import 'package:tanggapanku/pages/login.dart';
 import 'package:tanggapanku/pages/pengaduan.dart';
 import 'package:tanggapanku/pages/pengaturan_page.dart';
 import 'package:tanggapanku/pages/register.dart';
@@ -26,7 +28,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00B6A0)),
       ),
-      home: const LoginPage(),
+      home: const RegisterPage(),
     );
   }
 }
