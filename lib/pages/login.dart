@@ -63,8 +63,13 @@ class _LoginPageState extends State<LoginPage> {
         );
 
         // Ambil data user dari API
+        print("== DEBUG RESPONSE ==");
+        print(response.body);
+        print("== DECODED DATA ==");
+        print(data);
+
         final Map<String, dynamic> userData =
-            data['user']; // misal backend kirim 'user'
+            data['warga']; // misal backend kirim 'user'
 
         // Pindah ke TimelinePage & kirim data user
         Navigator.pushReplacement(

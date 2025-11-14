@@ -8,7 +8,6 @@ import 'package:tanggapanku/pages/pengaduan.dart';
 import 'package:tanggapanku/pages/pengaturan_page.dart';
 import 'package:tanggapanku/pages/register.dart';
 import 'package:tanggapanku/pages/timeline_page.dart';
-import 'pages/login.dart';
 // import 'pages/timeline_page.dart';
 import 'pages/splash_screen.dart';
 
@@ -28,7 +27,7 @@ class MyApp extends StatelessWidget {
         scaffoldBackgroundColor: Colors.white,
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00B6A0)),
       ),
-      home: const TimelinePage(),
+      home: const LoginPage(),
     );
   }
 }
