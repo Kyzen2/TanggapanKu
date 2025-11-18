@@ -68,8 +68,7 @@ class _LoginPageState extends State<LoginPage> {
         print("== DECODED DATA ==");
         print(data);
 
-        final Map<String, dynamic> userData =
-            data['warga']; // misal backend kirim 'user'
+        final userData = data['warga'][0];
 
         // Pindah ke TimelinePage & kirim data user
         Navigator.pushReplacement(
