@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
-// import '../pages/profile_page.dart';
 
 class HeaderBar extends StatelessWidget {
-  const HeaderBar({super.key});
+  final String userName; // Nama user yang dikirim dari halaman sebelumnya
+  final String? profileImageUrl; // Optional: URL foto profil user
+
+  const HeaderBar({
+    super.key,
+    required this.userName,
+    this.profileImageUrl, // default null, kalau null pakai avatar placeholder
+  });
 
   @override
   Widget build(BuildContext context) {
-    // sementara nama user hardcode
-    final String userName = "Muhamad Nabil Nur Praja";
-
     return Container(
       height: 70,
       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -23,9 +26,14 @@ class HeaderBar extends StatelessWidget {
           // FOTO PROFIL
           InkWell(
             borderRadius: BorderRadius.circular(20),
+            onTap: () {
+              // TODO: buka halaman profile
+            },
             child: CircleAvatar(
               radius: 23,
-              backgroundImage: NetworkImage('https://i.pravatar.cc/100?img=10'),
+              backgroundImage: profileImageUrl != null
+                  ? NetworkImage(profileImageUrl!)
+                  : const NetworkImage('https://i.pravatar.cc/100?img=10'),
             ),
           ),
 
@@ -57,7 +65,7 @@ class HeaderBar extends StatelessWidget {
             ),
           ),
 
-          // ICON 1
+          // ICON 1 (Contoh bisa diganti)
           Container(
             padding: const EdgeInsets.all(8),
             decoration: const BoxDecoration(
@@ -69,10 +77,13 @@ class HeaderBar extends StatelessWidget {
 
           const SizedBox(width: 10),
 
-          // ICON SETTINGS
+          // ICON NOTIFICATION / SETTINGS
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.settings_rounded, color: Color(0xFF7D54DF)),
+            onPressed: () {
+              // TODO: handle notifikasi
+            },
+            icon: const Icon(Icons.notifications_active,
+                color: Color(0xFF7D54DF)),
           ),
         ],
       ),

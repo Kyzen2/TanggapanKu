@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:gap/gap.dart';
+import 'package:tanggapanku/models/register.dart';
 import 'package:tanggapanku/pages/region_page.dart';
 import 'package:tanggapanku/pages/riwayat_page.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
@@ -12,10 +13,13 @@ import '../widgets/bottom_nav.dart';
 import 'pengaduan.dart';
 import 'pengaturan_page.dart';
 import 'register.dart';
+import 'riwayat_page.dart';
 
 class TimelinePage extends StatefulWidget {
+  final Map<String, dynamic> userData;
+
   final bool startTutorial;
-  const TimelinePage({super.key, this.startTutorial = false});
+  const TimelinePage({super.key, this.startTutorial = false, required this.userData});
 
   @override
   State<TimelinePage> createState() => _TimelinePageState();
@@ -180,7 +184,7 @@ class _TimelinePageState extends State<TimelinePage> {
     if (_pages.isEmpty) {
       _pages.addAll([
         TimelinePageContent(
-            keyCarousel: keyCarousel, scrollController: _scrollController),
+            keyCarousel: keyCarousel, scrollController: _scrollController, userName: widget.userData['nama']),
         const PengaduanPage(),
         const RegionListPage(),
         const RiwayatPengaduanPage(),
@@ -191,10 +195,17 @@ class _TimelinePageState extends State<TimelinePage> {
 
   @override
   Widget build(BuildContext context) {
+    final List<Widget> _pages = [
+      TimelinePageContent(userName: widget.userData['nama'], keyCarousel: keyCarousel, scrollController: _scrollController,), // kirim nama user
+      const PengaduanPage(),
+      const PengaduanPage(),
+      const RiwayatPengaduanPage(),
+      const AkunPage(),
+    ];
+
     return Scaffold(
       body: _pages[_selectedIndex],
       bottomNavigationBar: AnimatedSlide(
-        key: keyNavBar, // Tambahkan global key di nav
         duration: const Duration(milliseconds: 400),
         offset: _navVisible ? Offset.zero : const Offset(0, 1.4),
         curve: Curves.easeInOutCubicEmphasized,
@@ -213,10 +224,11 @@ class _TimelinePageState extends State<TimelinePage> {
 
 // Widget untuk isi halaman timeline
 class TimelinePageContent extends StatelessWidget {
+  final String userName;
   final GlobalKey keyCarousel;
   final ScrollController scrollController;
   TimelinePageContent(
-      {super.key, required this.keyCarousel, required this.scrollController});
+      {super.key, required this.keyCarousel, required this.scrollController, required this.userName});
 
   final List<Post> posts = [
     Post(
@@ -260,7 +272,10 @@ class TimelinePageContent extends StatelessWidget {
       child: CustomScrollView(
         controller: scrollController,
         slivers: [
-          const SliverToBoxAdapter(child: HeaderBar()),
+          // HeaderBar dengan nama user
+          SliverToBoxAdapter(
+            child: HeaderBar(userName: userName),
+          ),
 
           // carousel
           SliverToBoxAdapter(
