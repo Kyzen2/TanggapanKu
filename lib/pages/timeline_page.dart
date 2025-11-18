@@ -198,7 +198,7 @@ class _TimelinePageState extends State<TimelinePage> {
     final List<Widget> _pages = [
       TimelinePageContent(userName: widget.userData['nama'], keyCarousel: keyCarousel, scrollController: _scrollController,), // kirim nama user
       const PengaduanPage(),
-      const PengaduanPage(),
+      const RegisterPage(),
       const RiwayatPengaduanPage(),
       const AkunPage(),
     ];
