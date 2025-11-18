@@ -23,50 +23,46 @@ class Register {
 }
 
 class Warga {
+  int? id;
   String? nama;
-  String? noHp;
-  String? nik;
+  String? noHp; // Pastikan noHp bertipe String
+  String? nik; // Pastikan nik bertipe String
   String? password;
   String? alamat;
-  String? updatedAt;
-  String? createdAt;
-  int? id;
+  int? idDaerah;
 
   // Constructor untuk inisialisasi langsung
   Warga({
+    this.id,
     this.nama,
     this.noHp,
     this.nik,
     this.password,
     this.alamat,
-    this.updatedAt,
-    this.createdAt,
-    this.id,
+    this.idDaerah,
   });
 
   // Constructor untuk inisialisasi dari JSON (biasanya untuk respons dari API)
   Warga.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
     nama = json['nama'];
-    noHp = json['no_hp'];
-    nik = json['nik'];
+    noHp = json['no_hp']; // Pastikan noHp bertipe String
+    nik = json['nik']; // Pastikan nik bertipe String
     password = json['password'];
     alamat = json['alamat'];
-    updatedAt = json['updated_at'];
-    createdAt = json['created_at'];
-    id = json['id'];
+    idDaerah = json['id_daerah'];
   }
 
   // Mengubah data menjadi JSON untuk dikirim dengan POST
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = {};
+    data['id'] = id;
     data['nama'] = nama;
-    data['no_hp'] = noHp;
-    data['nik'] = nik;
+    data['no_hp'] = noHp; // Kirimkan noHp sebagai String
+    data['nik'] = nik; // Kirimkan nik sebagai String
     data['password'] = password;
     data['alamat'] = alamat;
-    data['updated_at'] = updatedAt;
-    data['created_at'] = createdAt;
-    data['id'] = id;
+    data['id_daerah'] = idDaerah;
     return data;
   }
 }

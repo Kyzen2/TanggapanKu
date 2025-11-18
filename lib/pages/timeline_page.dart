@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:gap/gap.dart';
+import 'package:tanggapanku/pages/region_page.dart';
 import 'package:tanggapanku/pages/riwayat_page.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../models/post.dart';
@@ -181,7 +182,7 @@ class _TimelinePageState extends State<TimelinePage> {
         TimelinePageContent(
             keyCarousel: keyCarousel, scrollController: _scrollController),
         const PengaduanPage(),
-        const RegisterPage(),
+        const RegionListPage(),
         const RiwayatPengaduanPage(),
         const AkunPage(),
       ]);

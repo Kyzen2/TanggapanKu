@@ -57,13 +57,17 @@ class ApiService {
 
 // Class ApiService baru dengan request registerUser menggunakan POST, dan parameter tambahan 'region'
 class ApiServiceRegister {
-  final String _baseUrl = "URL_API_TUJUAN"; // Ganti dengan URL API yang sesuai
+  final String _baseUrl =
+      "https://firmly-splendid-dove.ngrok-free.app/api"; // Ganti dengan URL API yang sesuai
 
   Future<Map<String, dynamic>> registerUser(Map<String, dynamic> data) async {
     try {
       final response = await http.post(
         Uri.parse('$_baseUrl/register'), // Endpoint untuk register
-        headers: {'Content-Type': 'application/json'},
+        headers: {
+          'accept': 'application/json',
+          'ngrok-skip-browser-warning': 'true',
+        },
         body: jsonEncode(data), // Data dikirim dalam format JSON
       );
 
