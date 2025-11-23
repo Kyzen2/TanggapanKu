@@ -1,8 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:tanggapanku/api/api_service.dart';
+import 'package:tanggapanku/pages/login.dart';
 import 'package:tanggapanku/pages/profile_page.dart';
 import 'package:tanggapanku/pages/timeline_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AkunPage extends StatelessWidget {
+  void logout(BuildContext context) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString("token");
+
+    if (token == null) {
+      // kalau token ga ada, langsung lempar ke login
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (_) => const LoginPage()),
+        (_) => false,
+      );
+      return;
+    }
+
+    final api = ApiService();
+    final res = await api.logoutUser(token);
+
+    // hapus token local
+    await prefs.remove("token");
+
+    if (res["status"] == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Berhasil logout")),
+      );
+    }
+
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (_) => const LoginPage()),
+      (_) => false,
+    );
+  }
+
   const AkunPage({super.key});
 
   @override
@@ -130,7 +166,10 @@ class AkunPage extends StatelessWidget {
               () {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                    builder: (_) => const TimelinePage(startTutorial: true, userData: {},),
+                    builder: (_) => const TimelinePage(
+                      startTutorial: true,
+                      userData: {},
+                    ),
                   ),
                 );
               },
@@ -143,7 +182,33 @@ class AkunPage extends StatelessWidget {
             // === Logout === //
             Center(
               child: GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        title: const Text("Konfirmasi"),
+                        content: const Text("Yakin mau logout?"),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text("Batal"),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                              logout(context);
+                            },
+                            child: const Text(
+                              "Logout",
+                              style: TextStyle(color: Colors.red),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+                },
                 child: const Text(
                   "Keluar",
                   style:

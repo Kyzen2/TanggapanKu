@@ -1,31 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:http/http.dart' as http;
 import 'package:tanggapanku/pages/timeline_page.dart';
-
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      debugShowCheckedModeBanner: false,
-      title: 'TanggapanKu App',
-      theme: ThemeData(
-        primarySwatch: Colors.blueGrey,
-        textTheme: GoogleFonts.poppinsTextTheme(
-          Theme.of(context).textTheme,
-        ),
-      ),
-      home: const LoginPage(),
-    );
-  }
-}
+import 'package:tanggapanku/api/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -35,42 +13,39 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  final ApiService api = ApiService();
   bool _isPasswordVisible = false;
-  TextEditingController nikC = TextEditingController();
-  TextEditingController passC = TextEditingController();
   bool _loading = false;
 
-  // 🔥 Fungsi Login
+  final TextEditingController nikC = TextEditingController();
+  final TextEditingController passC = TextEditingController();
+
+  // LOGIN FUNCTION (bersih, rapi)
   Future<void> login() async {
     setState(() => _loading = true);
 
     try {
-      final response = await http.post(
-        Uri.parse('https://firmly-splendid-dove.ngrok-free.app/api/login'),
-        headers: {"Content-Type": "application/json"},
-        body: jsonEncode({
-          "nik": nikC.text.trim(),
-          "password": passC.text.trim(),
-        }),
+      final result = await api.loginUser(
+        nikC.text.trim(),
+        passC.text.trim(),
       );
 
-      final data = jsonDecode(response.body);
+      final status = result['status'];
+      final body = result['body'];
 
-      if (response.statusCode == 200) {
-        // ✅ Login Berhasil
+      if (status == 200) {
+        final userData = body['warga']; // FIX 1
+        final token = body['token_jwt']; // FIX 2
+
+        // SIMPAN TOKEN DAN USER DATA
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+        await prefs.setString('user', jsonEncode(userData)); // OPTIONAL
+
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text("Login Berhasil!")),
         );
 
-        // Ambil data user dari API
-        print("== DEBUG RESPONSE ==");
-        print(response.body);
-        print("== DECODED DATA ==");
-        print(data);
-
-        final userData = data['warga'][0];
-
-        // Pindah ke TimelinePage & kirim data user
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
@@ -78,9 +53,10 @@ class _LoginPageState extends State<LoginPage> {
           ),
         );
       } else {
-        // ❌ Login Gagal
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(data['message'] ?? "Login gagal")),
+          SnackBar(
+            content: Text(body['message'] ?? "Login gagal"),
+          ),
         );
       }
     } catch (e) {
@@ -97,6 +73,7 @@ class _LoginPageState extends State<LoginPage> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
     final keyboardHeight = MediaQuery.of(context).viewInsets.bottom;
+
     const Color primaryBlueDark = Color(0xFF2C3E50);
     const Color accentBlue = Color(0xFF3F51B5);
 
@@ -122,7 +99,9 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   Padding(
                     padding: EdgeInsets.only(
-                        top: screenHeight * 0.08, left: screenWidth * 0.07),
+                      top: screenHeight * 0.08,
+                      left: screenWidth * 0.07,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -174,8 +153,9 @@ class _LoginPageState extends State<LoginPage> {
               color: Colors.white,
               child: Padding(
                 padding: EdgeInsets.symmetric(
-                    horizontal: screenWidth * 0.07,
-                    vertical: screenHeight * 0.04),
+                  horizontal: screenWidth * 0.07,
+                  vertical: screenHeight * 0.04,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -185,8 +165,11 @@ class _LoginPageState extends State<LoginPage> {
                         hintText: 'NIK',
                         filled: true,
                         fillColor: Colors.white,
-                        prefixIcon: Icon(Icons.person,
-                            color: Colors.grey, size: screenWidth * 0.06),
+                        prefixIcon: Icon(
+                          Icons.person,
+                          color: Colors.grey,
+                          size: screenWidth * 0.06,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
@@ -199,18 +182,24 @@ class _LoginPageState extends State<LoginPage> {
                         hintText: 'Password',
                         filled: true,
                         fillColor: Colors.white,
-                        prefixIcon: Icon(Icons.lock,
-                            color: Colors.grey, size: screenWidth * 0.06),
+                        prefixIcon: Icon(
+                          Icons.lock,
+                          color: Colors.grey,
+                          size: screenWidth * 0.06,
+                        ),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
                         ),
                         suffixIcon: IconButton(
-                          icon: Icon(_isPasswordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off),
+                          icon: Icon(
+                            _isPasswordVisible
+                                ? Icons.visibility
+                                : Icons.visibility_off,
+                          ),
                           onPressed: () {
-                            setState(
-                                () => _isPasswordVisible = !_isPasswordVisible);
+                            setState(() {
+                              _isPasswordVisible = !_isPasswordVisible;
+                            });
                           },
                         ),
                       ),
@@ -219,10 +208,13 @@ class _LoginPageState extends State<LoginPage> {
                       alignment: Alignment.centerRight,
                       child: TextButton(
                         onPressed: () {},
-                        child: Text('Lupa Password?',
-                            style: GoogleFonts.poppins(
-                                color: accentBlue,
-                                fontWeight: FontWeight.w600)),
+                        child: Text(
+                          'Lupa Password?',
+                          style: GoogleFonts.poppins(
+                            color: accentBlue,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
                     ),
                     SizedBox(
@@ -232,14 +224,16 @@ class _LoginPageState extends State<LoginPage> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: accentBlue,
                           padding: EdgeInsets.symmetric(
-                              vertical: screenHeight * 0.02),
+                            vertical: screenHeight * 0.02,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                         child: _loading
                             ? const CircularProgressIndicator(
-                                color: Colors.white)
+                                color: Colors.white,
+                              )
                             : Text(
                                 'Masuk',
                                 style: GoogleFonts.poppins(
@@ -252,7 +246,9 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                     Text(
                       'Belum punya akun?',
-                      style: GoogleFonts.poppins(color: Colors.grey[700]),
+                      style: GoogleFonts.poppins(
+                        color: Colors.grey[700],
+                      ),
                     ),
                     SizedBox(
                       width: double.infinity,
@@ -260,16 +256,23 @@ class _LoginPageState extends State<LoginPage> {
                         onPressed: () {},
                         style: OutlinedButton.styleFrom(
                           foregroundColor: accentBlue,
-                          side: const BorderSide(color: accentBlue, width: 2),
+                          side: const BorderSide(
+                            color: accentBlue,
+                            width: 2,
+                          ),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
                           padding: EdgeInsets.symmetric(
-                              vertical: screenHeight * 0.02),
+                            vertical: screenHeight * 0.02,
+                          ),
                         ),
-                        child: Text('Daftar',
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold)),
+                        child: Text(
+                          'Daftar',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ),
                     ),
                   ],
