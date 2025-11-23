@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:tanggapanku/api/api_service.dart';
+import 'package:tanggapanku/models/region.dart';
 
 class RegionListPage extends StatefulWidget {
   const RegionListPage({super.key});
@@ -10,6 +11,7 @@ class RegionListPage extends StatefulWidget {
 
 class _RegionListPageState extends State<RegionListPage> {
   final ApiService _apiService = ApiService();
+
   RegionPage? _regionPageData;
   bool _isLoading = true;
   String? _error;
@@ -42,7 +44,9 @@ class _RegionListPageState extends State<RegionListPage> {
     final list = _regionPageData?.daerah ?? [];
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Daftar Daerah')),
+      appBar: AppBar(
+        title: const Text('Daftar Daerah'),
+      ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : _error != null
@@ -54,8 +58,17 @@ class _RegionListPageState extends State<RegionListPage> {
                       itemBuilder: (context, index) {
                         final d = list[index];
                         return ListTile(
-                          title: Text(d.namaDaerah ?? 'Tidak diketahui'),
-                          subtitle: Text('ID: ${d.id ?? '-'}'),
+                          title: Text(d.namaDaerah),
+                          subtitle: Text('ID: ${d.id}'),
+                          onTap: () {
+                            Navigator.pop(
+                              context,
+                              {
+                                'id': d.id,
+                                'nama_daerah': d.namaDaerah,
+                              },
+                            );
+                          },
                         );
                       },
                     ),
