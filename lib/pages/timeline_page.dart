@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:tanggapanku/pages/riwayat_page.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../models/post.dart';
+import '../models/warga.dart';
 import '../widgets/header_bar.dart';
 import '../widgets/post_card.dart';
 import '../widgets/bottom_nav.dart';
@@ -17,7 +18,8 @@ class TimelinePage extends StatefulWidget {
   final Map<String, dynamic> userData;
 
   final bool startTutorial;
-  const TimelinePage({super.key, this.startTutorial = false, required this.userData});
+  const TimelinePage(
+      {super.key, this.startTutorial = false, required this.userData});
 
   @override
   State<TimelinePage> createState() => _TimelinePageState();
@@ -163,7 +165,9 @@ class _TimelinePageState extends State<TimelinePage> {
       paddingFocus: 10,
       textSkip: "Lewati",
       onFinish: () {},
-      onSkip: () { return true; },
+      onSkip: () {
+        return true;
+      },
     );
     tutorialCoachMark?.show(context: context);
   }
@@ -176,16 +180,22 @@ class _TimelinePageState extends State<TimelinePage> {
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> _pages = [
-      TimelinePageContent(userName: widget.userData['nama'], keyCarousel: keyCarousel, scrollController: _scrollController,), // kirim nama user
+    final List<Widget> pages = [
+      TimelinePageContent(
+        userName: widget.userData['nama'],
+        keyCarousel: keyCarousel,
+        scrollController: _scrollController,
+      ), // kirim nama user
       const PengaduanPage(),
       const RegisterPage(),
       const RiwayatPengaduanPage(),
-      const AkunPage(),
+      AkunPage(
+        warga: Warga.fromMap(widget.userData),
+      ),
     ];
 
     return Scaffold(
-      body: _pages[_selectedIndex],
+      body: pages[_selectedIndex],
       bottomNavigationBar: AnimatedSlide(
         duration: const Duration(milliseconds: 400),
         offset: _navVisible ? Offset.zero : const Offset(0, 1.4),
@@ -209,7 +219,10 @@ class TimelinePageContent extends StatelessWidget {
   final GlobalKey keyCarousel;
   final ScrollController scrollController;
   TimelinePageContent(
-      {super.key, required this.keyCarousel, required this.scrollController, required this.userName});
+      {super.key,
+      required this.keyCarousel,
+      required this.scrollController,
+      required this.userName});
 
   final List<Post> posts = [
     Post(

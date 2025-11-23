@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:tanggapanku/api/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tanggapanku/models/warga.dart';
 import 'package:tanggapanku/pages/login.dart';
 import 'package:tanggapanku/pages/profile_page.dart';
-import 'package:tanggapanku/pages/timeline_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tanggapanku/api/api_service.dart';
 
 class AkunPage extends StatelessWidget {
+  final Warga warga;
+
+  const AkunPage({super.key, required this.warga});
+
   void logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString("token");
 
     if (token == null) {
-      // kalau token ga ada, langsung lempar ke login
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const LoginPage()),
@@ -23,7 +26,6 @@ class AkunPage extends StatelessWidget {
     final api = ApiService();
     final res = await api.logoutUser(token);
 
-    // hapus token local
     await prefs.remove("token");
 
     if (res["status"] == 200) {
@@ -38,8 +40,6 @@ class AkunPage extends StatelessWidget {
       (_) => false,
     );
   }
-
-  const AkunPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -69,77 +69,70 @@ class AkunPage extends StatelessWidget {
               ),
               child: Column(
                 children: [
-                  const Row(
+                  Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       CircleAvatar(
                         radius: 24,
                         backgroundColor: Colors.grey,
+                        backgroundImage: warga.foto != null && warga.foto!.isNotEmpty
+                            ? NetworkImage(warga.foto!)
+                            : null,
                       ),
-                      SizedBox(width: 14),
+                      const SizedBox(width: 14),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              "Wendy Haryadi",
-                              style: TextStyle(
+                              warga.nama ?? "Nama tidak tersedia",
+                              style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16),
                             ),
-                            SizedBox(height: 3),
+                            const SizedBox(height: 3),
                             Text(
-                              "ID Layanan: 2241237",
+                              "Alamat: ${warga.alamat ?? '-'}",
                               style:
-                                  TextStyle(color: Colors.grey, fontSize: 13),
+                                  TextStyle(color: Colors.grey.shade700, fontSize: 13),
                             ),
                           ],
                         ),
                       ),
-                      SizedBox(width: 10),
-                      Icon(Icons.phone, size: 18),
-                      SizedBox(width: 6),
+                      const SizedBox(width: 10),
+                      const Icon(Icons.phone, size: 18),
+                      const SizedBox(width: 6),
                       Text(
-                        "+62 817-2345-4998",
-                        style: TextStyle(fontSize: 13),
+                        warga.noHp ?? "-",
+                        style: const TextStyle(fontSize: 13),
                       ),
                     ],
                   ),
                   const SizedBox(height: 14),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        "Disukai: 48   |   Kontribusi: 5",
-                        style: TextStyle(
-                            color: Colors.grey.shade700, fontSize: 13),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor:
+                            const Color.fromARGB(255, 255, 255, 255),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 18, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(6)),
                       ),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor:
-                              const Color.fromARGB(255, 255, 255, 255),
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 18, vertical: 8),
-                          shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(6)),
-                        ),
-                        onPressed: () {},
-                        child: GestureDetector(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const ProfilePage(),
-                              ),
-                            );
-                          },
-                          child: const Text(
-                            "Edit Profil",
-                            style: TextStyle(fontSize: 13),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const ProfilePage(),
                           ),
-                        ),
+                        );
+                      },
+                      child: const Text(
+                        "Edit Profil",
+                        style: TextStyle(fontSize: 13),
                       ),
-                    ],
-                  )
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -163,16 +156,7 @@ class AkunPage extends StatelessWidget {
               context,
               Icons.menu_book,
               "Panduan Penggunaan Aplikasi",
-              () {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(
-                    builder: (_) => const TimelinePage(
-                      startTutorial: true,
-                      userData: {},
-                    ),
-                  ),
-                );
-              },
+              () {},
             ),
             _menuItem(context, Icons.help_outline, "Pertanyaan Umum", () {}),
             _menuItem(context, Icons.settings, "Pengaturan Lainnya", () {}),
