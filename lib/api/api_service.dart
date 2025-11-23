@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:tanggapanku/models/region.dart';
 import 'package:tanggapanku/models/register.dart';
+import 'package:tanggapanku/models/berita.dart';
+import 'package:tanggapanku/models/berita_response.dart';
 
 class ApiService {
   static const String baseUrl =
@@ -121,5 +123,23 @@ class ApiService {
       "status": response.statusCode,
       "body": jsonDecode(resBody),
     };
+  }
+
+  Future<BeritaResponse> fetchBerita(String token) async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/berita'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "accept": "application/json",
+        'ngrok-skip-browser-warning': 'true',
+      },
+    );
+
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw Exception('Gagal load berita: ${_preview(res.body)}');
+    }
+
+    final jsonMap = jsonDecode(res.body);
+    return BeritaResponse.fromJson(jsonMap);
   }
 }
