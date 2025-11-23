@@ -87,4 +87,39 @@ class ApiService {
       "body": jsonDecode(res.body),
     };
   }
+
+  // POST /pengaduan (multipart)
+  Future<Map<String, dynamic>> postPengaduan({
+    required String token,
+    required String judul,
+    required String deskripsi,
+    List<String>? fotoPaths,
+  }) async {
+    final uri = Uri.parse('$baseUrl/pengaduan');
+    final request = http.MultipartRequest('POST', uri);
+
+    request.headers.addAll({
+      "Authorization": "Bearer $token",
+      "accept": "application/json",
+      'ngrok-skip-browser-warning': 'true',
+    });
+
+    request.fields['judul'] = judul;
+    request.fields['deskripsi'] = deskripsi;
+
+    // Upload banyak foto
+    if (fotoPaths != null && fotoPaths.isNotEmpty) {
+      for (var path in fotoPaths) {
+        request.files.add(await http.MultipartFile.fromPath('foto[]', path));
+      }
+    }
+
+    final response = await request.send();
+    final resBody = await response.stream.bytesToString();
+
+    return {
+      "status": response.statusCode,
+      "body": jsonDecode(resBody),
+    };
+  }
 }
