@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:tanggapanku/models/pengaduan.dart';
 import 'package:tanggapanku/models/region.dart';
 import 'package:tanggapanku/models/register.dart';
 import 'package:tanggapanku/models/berita.dart';
@@ -138,8 +139,26 @@ class ApiService {
     if (res.statusCode < 200 || res.statusCode >= 300) {
       throw Exception('Gagal load berita: ${_preview(res.body)}');
     }
-
     final jsonMap = jsonDecode(res.body);
     return BeritaResponse.fromJson(jsonMap);
+  }
+
+  Future<List<Pengaduan>> fetchRiwayatPengaduan(String token) async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/riwayat-pengaduan'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "accept": "application/json",
+        'ngrok-skip-browser-warning': 'true',
+      },
+    );
+
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw Exception('Gagal load riwayat pengaduan: ${_preview(res.body)}');
+    }
+
+    final jsonMap = jsonDecode(res.body);
+    final List<dynamic> pengaduanList = jsonMap['pengaduan'] ?? [];
+    return pengaduanList.map((e) => Pengaduan.fromJson(e)).toList();
   }
 }

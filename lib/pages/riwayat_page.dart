@@ -1,8 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:tanggapanku/api/api_service.dart';
+import 'package:tanggapanku/models/pengaduan.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-class RiwayatPengaduanPage extends StatelessWidget {
+class RiwayatPengaduanPage extends StatefulWidget {
   const RiwayatPengaduanPage({super.key});
+
+  @override
+  State<RiwayatPengaduanPage> createState() => _RiwayatPengaduanPageState();
+}
+
+class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
+  final api = ApiService();
+  String? token;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadToken();
+  }
+
+  Future<void> _loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      token = prefs.getString('token');
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,6 +37,12 @@ class RiwayatPengaduanPage extends StatelessWidget {
     const Color backgroundBlue = Color(0xFF39377C);
     const Color white = Colors.white;
 
+    if (token == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: white,
       appBar: AppBar(
@@ -20,7 +50,6 @@ class RiwayatPengaduanPage extends StatelessWidget {
         elevation: 0,
         title: Row(
           children: [
-            // Ganti logo ini sesuai asset/logo kamu
             Image.asset(
               'assets/Logo.png',
               height: screenHeight * 0.032,
@@ -68,27 +97,64 @@ class RiwayatPengaduanPage extends StatelessWidget {
               ),
             ),
             SizedBox(height: screenHeight * 0.03),
-            _buildPengaduanCard(
-              context,
-              judul: 'Laporan#223342 Lampu Mati Sebelah Mesjid As...',
-              tanggal: '25 Okt 2025 09:55 PM',
-              catatan: 'Belum ada',
-              status: 'Peninjauan',
-              onPressed: () {},
-            ),
-            SizedBox(height: screenHeight * 0.01),
-            _buildPengaduanCard(
-              context,
-              judul: 'Laporan#124742 Kehilangan 1 Unit Motor Honda V...',
-              tanggal: '12 Apr 2025 12:23 PM',
-              catatan: 'Kami sudah menindaklanjuti ...',
-              status: 'Selesai',
-              onPressed: () {},
+            Expanded(
+              child: FutureBuilder<List<Pengaduan>>(
+                future: api.fetchRiwayatPengaduan(token!),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(
+                      child: Text(
+                        'Error: ${snapshot.error}',
+                        style: const TextStyle(color: Colors.red),
+                      ),
+                    );
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return const Center(child: Text('Belum ada pengaduan.'));
+                  }
+
+                  final pengaduanList = snapshot.data!;
+                  return ListView.separated(
+                    itemCount: pengaduanList.length,
+                    separatorBuilder: (_, __) =>
+                        SizedBox(height: screenHeight * 0.01),
+                    itemBuilder: (context, index) {
+                      final p = pengaduanList[index];
+                      final catatan = _getCatatanFromStatus(p.status);
+
+                      return _buildPengaduanCard(
+                        context,
+                        judul: p.judul,
+                        tanggal: p.tglPengaduan,
+                        catatan: catatan,
+                        status: p.status,
+                        onPressed: () {},
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
     );
+  }
+
+  String _getCatatanFromStatus(String status) {
+    switch (status) {
+      case 'Diajukan':
+        return 'Sedang diajukan';
+      case 'Diproses':
+        return 'Sedang diproses';
+      case 'Selesai':
+        return 'Sudah selesai, terima kasih';
+      case 'Ditolak':
+        return 'Pengaduan ditolak';
+      default:
+        return '-';
+    }
   }
 
   Widget _buildPengaduanCard(
@@ -139,7 +205,7 @@ class RiwayatPengaduanPage extends StatelessWidget {
             ),
             const SizedBox(height: 3),
             Text(
-              'Catatan dari Petugas: $catatan',
+              'Catatan : $catatan',
               style: GoogleFonts.poppins(
                 fontSize: screenWidth * 0.03,
                 color: Colors.grey[700],
@@ -147,7 +213,7 @@ class RiwayatPengaduanPage extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             InkWell(
-              onTap: () {}, // Tindakan klik
+              onTap: () {},
               child: Text(
                 'Lihat Progress Laporan',
                 style: GoogleFonts.poppins(
