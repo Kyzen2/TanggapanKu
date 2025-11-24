@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import '../models/post.dart';
-import '../pages/detail_post.dart'; // <-- Tambahin ini
+import '../pages/detail_post.dart';
 
 class PostCard extends StatelessWidget {
   final Post post;
@@ -9,24 +9,34 @@ class PostCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Base URL untuk gambar dari API
+    const String baseUrl = "https://firmly-splendid-dove.ngrok-free.app/";
+
+    // Cek URL gambar, pakai placeholder kalau kosong
+    final String imageUrl = (post.imageUrl.isNotEmpty)
+        ? (post.imageUrl.startsWith("http")
+            ? post.imageUrl
+            : baseUrl + post.imageUrl)
+        : "https://via.placeholder.com/85";
+
     return GestureDetector(
       onTap: () {
-        // 👇 Arahkan ke halaman detail saat card diklik
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (_) => DetailPostingPage(
-              authorName: post.name, // Sesuai model kamu
-              authorRole: post.handle, // Bisa "Staff" / Pegawai / etc
-              date: DateTime.now(), // Kalau di model ada date, pake itu
-              content: post.text,
-              imageUrl: post.imageUrl,
+              title: post.title,
+              description: post.description,
+              imageUrl: imageUrl,
+              category: post.category,
+              date: post.date,
             ),
           ),
         );
       },
       child: Container(
         padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.symmetric(vertical: 6),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -45,13 +55,18 @@ class PostCard extends StatelessWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(10),
               child: Image.network(
-                post.imageUrl,
+                imageUrl,
                 width: 85,
                 height: 85,
                 fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  width: 85,
+                  height: 85,
+                  color: Colors.grey[300],
+                  child: const Icon(Icons.broken_image, size: 40),
+                ),
               ),
             ),
-
             const Gap(12),
 
             // BAGIAN KANAN
@@ -60,7 +75,7 @@ class PostCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "${post.handle}  ${post.name}",
+                    post.title,
                     style: const TextStyle(
                       fontWeight: FontWeight.w600,
                       fontSize: 15,
@@ -70,39 +85,16 @@ class PostCard extends StatelessWidget {
                   ),
                   const Gap(4),
                   Text(
-                    post.text,
+                    post.description,
                     style: const TextStyle(fontSize: 14, color: Colors.black87),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
                   const Gap(6),
                   Text(
-                    "Posted · ${post.comments} comments · ${post.likes} likes",
+                    "Category: ${post.category} · ${post.date}",
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
-                  const Gap(8),
-                  Row(
-                    children: [
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        onPressed: () {},
-                        icon: const Icon(Icons.favorite_border, size: 20),
-                      ),
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        onPressed: () {},
-                        icon: const Icon(Icons.comment_outlined, size: 20),
-                      ),
-                      IconButton(
-                        visualDensity: VisualDensity.compact,
-                        padding: EdgeInsets.zero,
-                        onPressed: () {},
-                        icon: const Icon(Icons.share, size: 20),
-                      ),
-                    ],
-                  )
                 ],
               ),
             ),

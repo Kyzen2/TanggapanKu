@@ -1,79 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:timeago/timeago.dart' as timeago;
+import 'package:tanggapanku/models/post.dart';
 
 class DetailPostingPage extends StatelessWidget {
-  final String authorName;
-  final String authorRole;
-  final DateTime date;
-  final String content;
+  final String title;
+  final String description;
   final String imageUrl;
+  final String category;
+  final String date;
 
   const DetailPostingPage({
     super.key,
-    required this.authorName,
-    required this.authorRole,
-    required this.date,
-    required this.content,
+    required this.title,
+    required this.description,
     required this.imageUrl,
+    required this.category,
+    required this.date,
   });
 
   @override
   Widget build(BuildContext context) {
     final primary = const Color(0xFF4047EB);
 
+    // Convert date string ke DateTime
+    final DateTime parsedDate = DateTime.tryParse(date) ?? DateTime.now();
+
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            const SizedBox(width: 6),
-            Text(
-              "Detail Postingan",
-              style: GoogleFonts.poppins(
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
+        title: Text(
+          "Detail Postingan",
+          style: GoogleFonts.poppins(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
         ),
+        backgroundColor: primary,
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // PROFILE HEADER
-          Row(
-            children: [
-              const CircleAvatar(
-                radius: 23,
-                backgroundImage:
-                    NetworkImage("https://i.pravatar.cc/100?img=12"),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(authorName,
-                        style: GoogleFonts.poppins(
-                            fontSize: 16, fontWeight: FontWeight.w600)),
-                    Text(authorRole,
-                        style: GoogleFonts.poppins(
-                            fontSize: 12, color: Colors.grey)),
-                  ],
-                ),
-              ),
-              Text(timeago.format(date, locale: "id"),
-                  style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey)),
-            ],
-          ),
-
-          const SizedBox(height: 18),
-
-          // CONTENT
+          // TITLE & CATEGORY
           Text(
-            content,
-            textAlign: TextAlign.justify,
-            style: GoogleFonts.poppins(fontSize: 15),
+            title,
+            style:
+                GoogleFonts.poppins(fontSize: 20, fontWeight: FontWeight.w600),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            "Kategori: ${category.toUpperCase()} · ${timeago.format(parsedDate, locale: 'id')}",
+            style: GoogleFonts.poppins(fontSize: 12, color: Colors.grey[600]),
           ),
 
           const SizedBox(height: 16),
@@ -81,7 +57,23 @@ class DetailPostingPage extends StatelessWidget {
           // IMAGE
           ClipRRect(
             borderRadius: BorderRadius.circular(15),
-            child: Image.network(imageUrl),
+            child: Image.network(
+              imageUrl,
+              errorBuilder: (_, __, ___) => Container(
+                height: 200,
+                color: Colors.grey[300],
+                child: const Icon(Icons.broken_image, size: 40),
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // DESCRIPTION
+          Text(
+            description,
+            textAlign: TextAlign.justify,
+            style: GoogleFonts.poppins(fontSize: 15),
           ),
 
           const SizedBox(height: 25),

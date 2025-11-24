@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:http/http.dart' as http;
 import 'package:tanggapanku/pages/timeline_page.dart';
+import 'package:tanggapanku/pages/register.dart';
 
 void main() {
   runApp(const MyApp());
@@ -63,18 +64,19 @@ class _LoginPageState extends State<LoginPage> {
         );
 
         // Ambil data user dari API
-        print("== DEBUG RESPONSE ==");
-        print(response.body);
-        print("== DECODED DATA ==");
-        print(data);
+        // print("== DEBUG RESPONSE ==");
+        // print(response.body);
+        // print("== DECODED DATA ==");
+        // print(data);
 
+        final token = data['token_jwt'];
         final userData = data['warga'][0];
 
         // Pindah ke TimelinePage & kirim data user
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (_) => TimelinePage(userData: userData),
+            builder: (_) => TimelinePage(userData: userData, token: token),
           ),
         );
       } else {
@@ -250,14 +252,17 @@ class _LoginPageState extends State<LoginPage> {
                               ),
                       ),
                     ),
-                    Text(
-                      'Belum punya akun?',
-                      style: GoogleFonts.poppins(color: Colors.grey[700]),
-                    ),
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => const RegisterPage(),
+                            ),
+                          );
+                        },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: accentBlue,
                           side: const BorderSide(color: accentBlue, width: 2),
@@ -265,13 +270,18 @@ class _LoginPageState extends State<LoginPage> {
                             borderRadius: BorderRadius.circular(10),
                           ),
                           padding: EdgeInsets.symmetric(
-                              vertical: screenHeight * 0.02),
+                            vertical: screenHeight * 0.02,
+                          ),
                         ),
-                        child: Text('Daftar',
-                            style: GoogleFonts.poppins(
-                                fontWeight: FontWeight.bold)),
+                        child: Text(
+                          'Daftar',
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),

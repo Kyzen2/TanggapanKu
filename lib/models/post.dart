@@ -1,19 +1,27 @@
 class Post {
-  final String name;
-  final String handle;
-  final String text;
-  final String avatarUrl;
+  final String title;
+  final String description;
   final String imageUrl;
-  final int comments;
-  final int likes;
+  final String category;
+  final String date;
 
   Post({
-    required this.name,
-    required this.handle,
-    required this.text,
-    required this.avatarUrl,
+    required this.title,
+    required this.description,
     required this.imageUrl,
-    required this.comments,
-    required this.likes,
+    required this.category,
+    required this.date,
   });
+
+  factory Post.fromJson(Map<String, dynamic> json) {
+    const String baseUrl = "https://firmly-splendid-dove.ngrok-free.app/";
+
+    return Post(
+      title: json['judul'] ?? '',
+      description: json['deskripsi'] ?? '',
+      category: (json['kategori'] ?? '').toString().toLowerCase(),
+      date: json['tgl_terbit'] ?? '',
+      imageUrl: baseUrl + (json['foto'] ?? ''),
+    );
+  }
 }

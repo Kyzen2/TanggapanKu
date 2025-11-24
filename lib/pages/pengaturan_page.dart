@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tanggapanku/pages/profile_page.dart';
 import 'package:tanggapanku/pages/timeline_page.dart';
+import 'package:tanggapanku/services/logout_services.dart';
 
 class AkunPage extends StatelessWidget {
   const AkunPage({super.key});
@@ -116,7 +117,7 @@ class AkunPage extends StatelessWidget {
             ),
 
             const SizedBox(height: 16),
-
+          
             // === Menu Items === //
             _menuItem(context, Icons.person, "Informasi Data Pribadi", () {}),
             _menuItem(
@@ -130,7 +131,7 @@ class AkunPage extends StatelessWidget {
               () {
                 Navigator.of(context).pushReplacement(
                   MaterialPageRoute(
-                    builder: (_) => const TimelinePage(startTutorial: true, userData: {},),
+                    builder: (_) => const TimelinePage(startTutorial: true, userData: {}, token : ''),
                   ),
                 );
               },
@@ -143,7 +144,12 @@ class AkunPage extends StatelessWidget {
             // === Logout === //
             Center(
               child: GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  final keluar = await showLogoutDialog(context);
+                  if (keluar == true) {
+                    await LogoutService.logout(context);
+                  }
+                },
                 child: const Text(
                   "Keluar",
                   style:
@@ -151,11 +157,99 @@ class AkunPage extends StatelessWidget {
                 ),
               ),
             ),
-
             const SizedBox(height: 40),
           ],
         ),
       ),
+    );
+  }
+
+Future<bool?> showLogoutDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Icon bulat merah
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: const BoxDecoration(
+                    color: Colors.red,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.logout,
+                    color: Colors.white,
+                    size: 40,
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                const Text(
+                  "Yakin Keluar?",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+
+                const SizedBox(height: 20),
+
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    // Tombol Iya
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(true);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Color(0xFF2C2C6B),
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 26, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text("Iya",
+                          style: TextStyle(color: Colors.white)),
+                    ),
+
+                    const SizedBox(width: 12),
+
+                    // Tombol Tidak
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(false);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 26, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child: const Text("Tidak",
+                          style: TextStyle(color: Colors.white)),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter/rendering.dart';
 import 'package:carousel_slider/carousel_slider.dart';
 import 'package:gap/gap.dart';
 import 'package:tanggapanku/pages/riwayat_page.dart';
+import 'package:tanggapanku/services/berita_services.dart';
 import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
 import '../models/post.dart';
 import '../widgets/header_bar.dart';
@@ -11,13 +12,14 @@ import '../widgets/bottom_nav.dart';
 import 'pengaduan.dart';
 import 'pengaturan_page.dart';
 import 'register.dart';
-import 'riwayat_page.dart';
+// import 'riwayat_page.dart';
 
 class TimelinePage extends StatefulWidget {
   final Map<String, dynamic> userData;
+  final String token;
 
   final bool startTutorial;
-  const TimelinePage({super.key, this.startTutorial = false, required this.userData});
+  const TimelinePage({super.key, this.startTutorial = false, this.userData = const {}, required this.token });
 
   @override
   State<TimelinePage> createState() => _TimelinePageState();
@@ -177,7 +179,9 @@ class _TimelinePageState extends State<TimelinePage> {
   @override
   Widget build(BuildContext context) {
     final List<Widget> _pages = [
-      TimelinePageContent(userName: widget.userData['nama'], keyCarousel: keyCarousel, scrollController: _scrollController,), // kirim nama user
+      TimelinePageContent(userName: widget.userData['nama'] ?? 'User', keyCarousel: keyCarousel, scrollController: _scrollController,
+        token: widget.token,
+      ), // kirim nama user
       const PengaduanPage(),
       const RegisterPage(),
       const RiwayatPengaduanPage(),
@@ -194,9 +198,11 @@ class _TimelinePageState extends State<TimelinePage> {
           duration: const Duration(milliseconds: 400),
           opacity: _navVisible ? 1 : 0,
           child: FloatingNav(
+            key: keyNavBar, // ← WAJIB dipasang!
             currentIndex: _selectedIndex,
             onTap: _onNavTap,
           ),
+
         ),
       ),
     );
@@ -204,104 +210,128 @@ class _TimelinePageState extends State<TimelinePage> {
 }
 
 // Widget untuk isi halaman timeline
-class TimelinePageContent extends StatelessWidget {
+class TimelinePageContent extends StatefulWidget {
   final String userName;
   final GlobalKey keyCarousel;
   final ScrollController scrollController;
-  TimelinePageContent(
-      {super.key, required this.keyCarousel, required this.scrollController, required this.userName});
+  final String token;
 
-  final List<Post> posts = [
-    Post(
-      name: 'Futaba',
-      handle: '@R_Futaba',
-      text: 'This is my Husband',
-      avatarUrl: 'https://i.pravatar.cc/100?img=5',
-      imageUrl: 'https://picsum.photos/seed/p1/600/360',
-      comments: 12000,
-      likes: 10000,
-    ),
-    Post(
-      name: 'Vergil',
-      handle: '@V_TheDevil',
-      text: 'Wanted, stupid child lost',
-      avatarUrl: 'https://i.pravatar.cc/100?img=12',
-      imageUrl: 'https://picsum.photos/seed/p2/600/360',
-      comments: 320,
-      likes: 1000,
-    ),
-    Post(
-      name: 'Sahronu',
-      handle: '@S_Roniloni',
-      text: 'Sembunyi di kamar mandi cek!',
-      avatarUrl: 'https://i.pravatar.cc/100?img=22',
-      imageUrl: 'https://picsum.photos/seed/p3/600/360',
-      comments: 45,
-      likes: 210,
-    ),
-  ];
+  const TimelinePageContent({
+    super.key,
+    required this.keyCarousel,
+    required this.scrollController,
+    required this.userName,
+    required this.token,
+  });
 
-  final List<String> sliderImages = [
-    'https://picsum.photos/seed/p4/600/360',
-    'https://picsum.photos/seed/p5/600/360',
-    'https://picsum.photos/seed/p1/600/360',
-  ];
+  @override
+  State<TimelinePageContent> createState() => _TimelinePageContentState();
+}
+
+class _TimelinePageContentState extends State<TimelinePageContent> {
+  List<Post> carouselPosts = [];
+  List<Post> generalPosts = [];
+  bool isLoading = true;
+
+  final TimelineService timelineService = TimelineService();
+  late String token;
+
+  @override
+  void initState() {
+    super.initState();
+    token = widget.token;
+    fetchBerita();
+  }
+
+  Future<void> fetchBerita() async {
+    setState(() => isLoading = true);
+
+    try {
+      final List<Post> response = await timelineService.getBerita(token);
+
+      final List<Post> bantuan = [];
+      final List<Post> umum = [];
+
+      for (var post in response) {
+        if (post.category.toLowerCase() == 'bantuan') {
+          bantuan.add(post);
+        } else {
+          umum.add(post);
+        }
+      }
+
+      setState(() {
+        carouselPosts = bantuan;
+        generalPosts = umum;
+        isLoading = false;
+      });
+    } catch (e) {
+      print("Error fetch berita: $e");
+      setState(() => isLoading = false);
+    }
+  }
+
 
   @override
   Widget build(BuildContext context) {
+    if (isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return SafeArea(
       child: CustomScrollView(
-        controller: scrollController,
+        controller: widget.scrollController,
         slivers: [
-          // HeaderBar dengan nama user
           SliverToBoxAdapter(
-            child: HeaderBar(userName: userName),
+            child: HeaderBar(userName: widget.userName),
           ),
 
-          // carousel
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: CarouselSlider(
-                key: keyCarousel, // pasang key tutorial
-                options: CarouselOptions(
-                  height: 200,
-                  autoPlay: true,
-                  enlargeCenterPage: true,
-                  viewportFraction: 0.9,
-                  autoPlayInterval: const Duration(seconds: 5),
-                  autoPlayAnimationDuration: const Duration(milliseconds: 800),
-                ),
-                items: sliderImages.map((image) {
-                  return Builder(
-                    builder: (BuildContext context) {
-                      return ClipRRect(
-                        borderRadius: BorderRadius.circular(16),
-                        child: Stack(
-                          fit: StackFit.expand,
-                          children: [
-                            Image.network(image, fit: BoxFit.cover),
-                            Container(
-                              decoration: BoxDecoration(
-                                gradient: LinearGradient(
-                                  begin: Alignment.bottomCenter,
-                                  end: Alignment.topCenter,
-                                  colors: [
-                                    Colors.black.withOpacity(0.4),
-                                    Colors.transparent,
-                                  ],
+          // Carousel Bantuan
+          if (carouselPosts.isNotEmpty)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: CarouselSlider(
+                  key: widget.keyCarousel,
+                  options: CarouselOptions(
+                    height: 200,
+                    autoPlay: true,
+                    enlargeCenterPage: true,
+                    viewportFraction: 0.9,
+                    autoPlayInterval: const Duration(seconds: 5),
+                    autoPlayAnimationDuration:
+                        const Duration(milliseconds: 800),
+                  ),
+                  items: carouselPosts.map((post) {
+                    return Builder(
+                      builder: (BuildContext context) {
+                        return ClipRRect(
+                          borderRadius: BorderRadius.circular(16),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            children: [
+                              Image.network(post.imageUrl, fit: BoxFit.cover),
+                              Container(
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    begin: Alignment.bottomCenter,
+                                    end: Alignment.topCenter,
+                                    colors: [
+                                      Colors.black.withOpacity(0.4),
+                                      Colors.transparent,
+                                    ],
+                                  ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                }).toList(),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  }).toList(),
+                ),
               ),
             ),
-          ),
 
           const SliverToBoxAdapter(
             child: Padding(
@@ -316,14 +346,18 @@ class TimelinePageContent extends StatelessWidget {
             ),
           ),
 
-          SliverList.separated(
-            itemCount: posts.length,
-            separatorBuilder: (_, __) => const Gap(8),
-            itemBuilder: (context, index) => Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-              child: PostCard(post: posts[index]),
+          // Berita Umum
+          if (generalPosts.isNotEmpty)
+            SliverList.separated(
+              itemCount: generalPosts.length,
+              separatorBuilder: (_, __) => const Gap(8),
+              itemBuilder: (context, index) => Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                child: PostCard(post: generalPosts[index]),
+              ),
             ),
-          ),
+
           const SliverToBoxAdapter(child: SizedBox(height: 100)),
         ],
       ),
