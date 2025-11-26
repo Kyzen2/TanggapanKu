@@ -1,19 +1,93 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:image_picker/image_picker.dart';
+import '../api/api_service.dart';
+import '../models/warga.dart';
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+class ProfilePage extends StatefulWidget {
+  final Warga user;
+  final String token;
+
+  const ProfilePage({
+    super.key,
+    required this.user,
+    required this.token,
+  });
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final purple = const Color(0xFF7D54DF);
+  
+
+  // Controller
+  late TextEditingController namaC;
+  late TextEditingController emailC; // pake nik lu jadikan "email" UI
+  late TextEditingController passwordC;
+  late TextEditingController passwordBaruC;
+
+  String? pickedFotoPath;
+
+  @override
+  void initState() {
+    super.initState();
+    namaC = TextEditingController(text: widget.user.nama ?? '');
+    emailC = TextEditingController(text: widget.user.nik);
+    passwordC = TextEditingController();
+    passwordBaruC = TextEditingController();
+  }
+
+  Future<void> pickFoto() async {
+    final picker = ImagePicker();
+    final img = await picker.pickImage(source: ImageSource.gallery);
+
+    if (img != null) {
+      setState(() {
+        pickedFotoPath = img.path;
+      });
+    }
+  }
+
+  Future<void> saveChanges() async {
+    if (passwordC.text.isNotEmpty && passwordBaruC.text.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Password baru wajib diisi.")),
+      );
+      return;
+    }
+
+    final api = ApiService();
+
+    final res = await api.updateProfile(
+      token: widget.token,
+      nama: namaC.text,
+      noHp: widget.user.noHp,
+      alamat: widget.user.alamat,
+      password: passwordBaruC.text.isNotEmpty ? passwordBaruC.text : null,
+      fotoPath: pickedFotoPath,
+    );
+
+    if (res["status"] == 200) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Profil berhasil diperbarui")),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Gagal: ${res['body']['message']}")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final purple = const Color(0xFF7D54DF);
-
     return Scaffold(
       backgroundColor: Colors.grey[50],
       body: SafeArea(
         child: Stack(
           children: [
-            // 🔹 Background gradien + wave
             Align(
               alignment: Alignment.bottomCenter,
               child: ClipPath(
@@ -30,14 +104,11 @@ class ProfilePage extends StatelessWidget {
                 ),
               ),
             ),
-
-            // 🔹 Konten utama
             SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // 🔹 Header
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -45,17 +116,9 @@ class ProfilePage extends StatelessWidget {
                         icon: Icons.arrow_back_ios_new_rounded,
                         onTap: () => Navigator.pop(context),
                       ),
-                      // _circleButton(
-                      //   icon: Icons.settings_rounded,
-                      //   iconColor: purple,
-                      //   bgColor: purple.withOpacity(0.1),
-                      //   onTap: () {},
-                      // ),
                     ],
                   ),
                   const Gap(16),
-
-                  // 🔹 Judul
                   Text(
                     'PROFILE',
                     style: TextStyle(
@@ -66,8 +129,6 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ),
                   const Gap(30),
-
-                  // 🔹 Foto profil dengan efek bayangan
                   Stack(
                     alignment: Alignment.bottomRight,
                     children: [
@@ -84,16 +145,22 @@ class ProfilePage extends StatelessWidget {
                             ),
                           ],
                           border: Border.all(color: purple, width: 3),
-                          image: const DecorationImage(
+                          image: DecorationImage(
                             fit: BoxFit.cover,
-                            image: NetworkImage(
-                              'https://i.pinimg.com/736x/d7/0b/12/d70b12e501a967030a9f017edbdfbead.jpg',
-                            ),
+                            image: pickedFotoPath != null
+                                ? FileImage(File(pickedFotoPath!))
+                                : (widget.user.foto != null
+                                    ? NetworkImage(
+                                        "https://firmly-splendid-dove.ngrok-free.app/storage/${widget.user.foto}",
+                                      ) as ImageProvider
+                                    : const NetworkImage(
+                                        'https://i.pinimg.com/736x/d7/0b/12/d70b12e501a967030a9f017edbdfbead.jpg',
+                                      )),
                           ),
                         ),
                       ),
                       GestureDetector(
-                        onTap: () {},
+                        onTap: pickFoto,
                         child: Container(
                           width: 38,
                           height: 38,
@@ -118,8 +185,6 @@ class ProfilePage extends StatelessWidget {
                     ],
                   ),
                   const Gap(30),
-
-                  // 🔹 Form container modern
                   Container(
                     width: double.infinity,
                     padding: const EdgeInsets.all(22),
@@ -139,19 +204,20 @@ class ProfilePage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _buildField('USERNAME'),
+                        _buildField('USERNAME', controller: namaC),
                         const Gap(14),
-                        _buildField('E-mail'),
+                        _buildField('E-mail',
+                            controller: emailC, readOnly: true),
                         const Gap(14),
-                        _buildField('PASSWORD', obscure: true),
+                        _buildField('PASSWORD',
+                            controller: passwordC, obscure: true),
                         const Gap(14),
-                        _buildField('PASSWORD BARU', obscure: true),
+                        _buildField('PASSWORD BARU',
+                            controller: passwordBaruC, obscure: true),
                         const Gap(25),
-
-                        // 🔹 Tombol simpan modern
                         Center(
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: saveChanges,
                             style: ElevatedButton.styleFrom(
                               elevation: 3,
                               backgroundColor: purple,
@@ -184,7 +250,6 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // 🔹 Tombol bulat (untuk back & setting)
   Widget _circleButton({
     required IconData icon,
     required VoidCallback onTap,
@@ -206,8 +271,10 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // Input field builder
-  Widget _buildField(String label, {bool obscure = false}) {
+  Widget _buildField(String label,
+      {bool obscure = false,
+      TextEditingController? controller,
+      bool readOnly = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -221,7 +288,9 @@ class ProfilePage extends StatelessWidget {
         ),
         const Gap(6),
         TextField(
+          controller: controller,
           obscureText: obscure,
+          readOnly: readOnly,
           decoration: InputDecoration(
             filled: true,
             fillColor: Colors.grey[100],
@@ -237,7 +306,7 @@ class ProfilePage extends StatelessWidget {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide:
-                  BorderSide(color: const Color(0xFF7D54DF), width: 1.2),
+                  const BorderSide(color: Color(0xFF7D54DF), width: 1.2),
             ),
           ),
         ),
@@ -246,7 +315,6 @@ class ProfilePage extends StatelessWidget {
   }
 }
 
-// 🔹 Custom wave bawah
 class _BottomWaveClipper extends CustomClipper<Path> {
   @override
   Path getClip(Size size) {

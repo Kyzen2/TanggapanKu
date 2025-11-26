@@ -5,16 +5,36 @@ import 'package:tanggapanku/pages/login.dart';
 import 'package:tanggapanku/pages/profile_page.dart';
 import 'package:tanggapanku/api/api_service.dart';
 
-class AkunPage extends StatelessWidget {
+class AkunPage extends StatefulWidget {
   final Warga warga;
 
   const AkunPage({super.key, required this.warga});
 
+  @override
+  State<AkunPage> createState() => _AkunPageState();
+}
+
+class _AkunPageState extends State<AkunPage> {
+  String? token;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadToken();
+  }
+
+  Future<void> _loadToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    setState(() {
+      token = prefs.getString("token");
+    });
+  }
+
   void logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString("token");
+    final savedToken = prefs.getString("token");
 
-    if (token == null) {
+    if (savedToken == null) {
       Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(builder: (_) => const LoginPage()),
@@ -24,7 +44,7 @@ class AkunPage extends StatelessWidget {
     }
 
     final api = ApiService();
-    final res = await api.logoutUser(token);
+    final res = await api.logoutUser(savedToken);
 
     await prefs.remove("token");
 
@@ -45,6 +65,12 @@ class AkunPage extends StatelessWidget {
   Widget build(BuildContext context) {
     const primaryColor = Color(0xFF2C2C6B);
 
+    if (token == null) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: SingleChildScrollView(
@@ -52,7 +78,6 @@ class AkunPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // === PROFILE CARD === //
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -75,9 +100,10 @@ class AkunPage extends StatelessWidget {
                       CircleAvatar(
                         radius: 24,
                         backgroundColor: Colors.grey,
-                        backgroundImage: warga.foto != null && warga.foto!.isNotEmpty
-                            ? NetworkImage(warga.foto!)
-                            : null,
+                        backgroundImage:
+                            widget.warga.foto != null && widget.warga.foto!.isNotEmpty
+                                ? NetworkImage(widget.warga.foto!)
+                                : null,
                       ),
                       const SizedBox(width: 14),
                       Expanded(
@@ -85,15 +111,15 @@ class AkunPage extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              warga.nama ?? "Nama tidak tersedia",
+                              widget.warga.nama ?? "Nama tidak tersedia",
                               style: const TextStyle(
                                   fontWeight: FontWeight.bold, fontSize: 16),
                             ),
                             const SizedBox(height: 3),
                             Text(
-                              "Alamat: ${warga.alamat ?? '-'}",
-                              style:
-                                  TextStyle(color: Colors.grey.shade700, fontSize: 13),
+                              "Alamat: ${widget.warga.alamat ?? '-'}",
+                              style: TextStyle(
+                                  color: Colors.grey.shade700, fontSize: 13),
                             ),
                           ],
                         ),
@@ -102,7 +128,7 @@ class AkunPage extends StatelessWidget {
                       const Icon(Icons.phone, size: 18),
                       const SizedBox(width: 6),
                       Text(
-                        warga.noHp ?? "-",
+                        widget.warga.noHp ?? "-",
                         style: const TextStyle(fontSize: 13),
                       ),
                     ],
@@ -123,7 +149,10 @@ class AkunPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const ProfilePage(),
+                            builder: (context) => ProfilePage(
+                              user: widget.warga,
+                              token: token!, // FIX
+                            ),
                           ),
                         );
                       },
@@ -146,24 +175,15 @@ class AkunPage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // === Menu Items === //
             _menuItem(context, Icons.person, "Informasi Data Pribadi", () {}),
-            _menuItem(
-                context, Icons.notifications, "Penyesuaian Notifikasi", () {}),
-            _menuItem(
-                context, Icons.article, "Syarat dan Ketentuan Aplikasi", () {}),
-            _menuItem(
-              context,
-              Icons.menu_book,
-              "Panduan Penggunaan Aplikasi",
-              () {},
-            ),
+            _menuItem(context, Icons.notifications, "Penyesuaian Notifikasi", () {}),
+            _menuItem(context, Icons.article, "Syarat dan Ketentuan Aplikasi", () {}),
+            _menuItem(context, Icons.menu_book, "Panduan Penggunaan Aplikasi", () {}),
             _menuItem(context, Icons.help_outline, "Pertanyaan Umum", () {}),
             _menuItem(context, Icons.settings, "Pengaturan Lainnya", () {}),
 
             const SizedBox(height: 20),
 
-            // === Logout === //
             Center(
               child: GestureDetector(
                 onTap: () {

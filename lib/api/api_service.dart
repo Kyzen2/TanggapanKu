@@ -161,4 +161,44 @@ class ApiService {
     final List<dynamic> pengaduanList = jsonMap['pengaduan'] ?? [];
     return pengaduanList.map((e) => Pengaduan.fromJson(e)).toList();
   }
+
+  Future<Map<String, dynamic>> updateProfile({
+    required String token,
+    String? nama,
+    String? noHp,
+    String? alamat,
+    String? password,
+    String? fotoPath, // path file foto
+  }) async {
+    final uri = Uri.parse('$baseUrl/updateProfile');
+    final request = http.MultipartRequest('POST', uri);
+
+    request.headers.addAll({
+      "Authorization": "Bearer $token",
+      "accept": "application/json",
+      'ngrok-skip-browser-warning': 'true',
+    });
+
+    // field biasa
+    if (nama != null) request.fields['nama'] = nama;
+    if (noHp != null) request.fields['no_hp'] = noHp;
+    if (alamat != null) request.fields['alamat'] = alamat;
+    if (password != null) request.fields['password'] = password;
+
+    // file foto
+    if (fotoPath != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('foto', fotoPath),
+      );
+    }
+
+    // kirim
+    final response = await request.send();
+    final resBody = await response.stream.bytesToString();
+
+    return {
+      "status": response.statusCode,
+      "body": jsonDecode(resBody),
+    };
+  }
 }
