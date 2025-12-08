@@ -182,7 +182,7 @@ class _TimelinePageState extends State<TimelinePage> {
       const RegisterPage(),
       const RiwayatPengaduanPage(),
       AkunPage(
-        warga: Warga.fromMap(widget.userData),
+        warga: Warga.fromJson(widget.userData)
       ),
     ];
 
