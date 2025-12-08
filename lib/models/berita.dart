@@ -24,13 +24,17 @@ class Berita {
   });
 
   factory Berita.fromJson(Map<String, dynamic> json) {
+    const baseUrl = "https://firmly-splendid-dove.ngrok-free.app";
+
+    String? rawFoto = json['foto'];
+
     return Berita(
       id: json['id'],
       idDaerah: json['id_daerah'],
       idOperator: json['id_operator'],
       judul: json['judul'] ?? '',
       deskripsi: json['deskripsi'],
-      foto: json['foto'],
+      foto: rawFoto != null ? "$baseUrl/$rawFoto" : null,
       tglTerbit: json['tgl_terbit'] ?? '',
       kategori: json['kategori'] ?? '',
       createdAt: json['created_at'] ?? '',

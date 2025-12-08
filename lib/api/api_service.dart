@@ -201,4 +201,28 @@ class ApiService {
       "body": jsonDecode(resBody),
     };
   }
+
+  Future<List<Berita>> fetchBeritaByDaerah(String token) async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/berita'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "accept": "application/json",
+        'ngrok-skip-browser-warning': 'true',
+      },
+    );
+
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw Exception('Gagal load berita: ${_preview(res.body)}');
+    }
+
+    final jsonMap = jsonDecode(res.body);
+
+    // backend: { message, id_daerah_warga, berita: [ ... ] }
+    final List data = jsonMap['berita'] ?? [];
+
+    print(data);
+
+    return data.map((e) => Berita.fromJson(e)).toList();
+  }
 }
