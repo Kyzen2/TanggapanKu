@@ -1,133 +1,198 @@
-// tanggapanku/api/api_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:tanggapanku/models/pengaduan.dart';
+import 'package:tanggapanku/models/region.dart';
+import 'package:tanggapanku/models/register.dart';
+import 'package:tanggapanku/models/berita.dart';
+import 'package:tanggapanku/models/berita_response.dart';
 
 class ApiService {
-  // pastikan ini URL yang aktif
-  static const String _baseUrl =
-      'https://firmly-splendid-dove.ngrok-free.app/api/daerah';
+  static const String baseUrl =
+      'https://firmly-splendid-dove.ngrok-free.app/api';
 
+  // GET /daerah
   Future<RegionPage> fetchDaerah() async {
-    // trik ngrok: tambahkan query agar gak dapat halaman warning HTML
-    final uri = Uri.parse('$_baseUrl?ngrok-skip-browser-warning=true');
     final res = await http.get(
-      uri,
-      headers: const {
+      Uri.parse('$baseUrl/daerah'),
+      headers: {
         'Accept': 'application/json',
-        // trik ngrok juga bisa via header:
         'ngrok-skip-browser-warning': 'true',
       },
     );
 
-    // Log minimal saat dev
-    // print('GET $uri -> ${res.statusCode}');
-    // print('CT: ${res.headers['content-type']}');
-    // print('BODY: ${res.body.substring(0, res.body.length > 500 ? 500 : res.body.length)}');
-
-    // cek status code dulu
     if (res.statusCode < 200 || res.statusCode >= 300) {
-      // kalau backend balikin HTML, kasih hint
-      final ct = res.headers['content-type'] ?? '';
-      if (!ct.contains('application/json')) {
-        throw Exception(
-          'HTTP ${res.statusCode} (non-JSON: $ct). Body awal: ${_preview(res.body)}',
-        );
-      }
-      throw Exception('HTTP ${res.statusCode}: ${res.reasonPhrase}');
+      throw Exception('Request gagal: ${_preview(res.body)}');
     }
 
-    // pastikan content-type JSON sebelum decode
-    final ct = res.headers['content-type'] ?? '';
-    if (!ct.contains('application/json')) {
-      throw Exception(
-        'Server balikin non-JSON ($ct). Body awal: ${_preview(res.body)}',
-      );
-    }
-
-    final jsonMap = json.decode(res.body) as Map<String, dynamic>;
+    final jsonMap = jsonDecode(res.body);
     return RegionPage.fromJson(jsonMap);
   }
 
-  String _preview(String s, [int max = 180]) {
-    if (s.isEmpty) return '(empty)';
+  // POST /register
+  Future<Register> registerUser(Map<String, dynamic> data) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/register'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+        'ngrok-skip-browser-warning': 'true',
+      },
+      body: jsonEncode(data),
+    );
+
+    if (res.statusCode != 200 && res.statusCode != 201) {
+      throw Exception('Gagal register: ${_preview(res.body)}');
+    }
+
+    final jsonMap = jsonDecode(res.body);
+    return Register.fromJson(jsonMap);
+  }
+
+  // POST /login
+  Future<Map<String, dynamic>> loginUser(String nik, String password) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/login'),
+      headers: {
+        "Content-Type": "application/json",
+        "accept": "application/json",
+        'ngrok-skip-browser-warning': 'true',
+      },
+      body: jsonEncode({
+        "nik": nik,
+        "password": password,
+      }),
+    );
+
+    return {
+      "status": res.statusCode,
+      "body": jsonDecode(res.body),
+    };
+  }
+
+  // Utility buat debug
+  String _preview(String s, [int max = 160]) {
     final clean = s.replaceAll('\n', ' ').replaceAll('\r', ' ');
     return clean.length <= max ? clean : '${clean.substring(0, max)}...';
   }
-}
 
 // Class ApiService baru dengan request registerUser menggunakan POST, dan parameter tambahan 'region'
 class ApiServiceRegister {
   final String _baseUrl = "https://firmly-splendid-dove.ngrok-free.app/api/register"; // Ganti dengan URL API yang sesuai
 
-  Future<Map<String, dynamic>> registerUser(Map<String, dynamic> data) async {
-    try {
-      final response = await http.post(
-        Uri.parse('$_baseUrl/register'), // Endpoint untuk register
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode(data), // Data dikirim dalam format JSON
-      );
+    return {
+      "status": res.statusCode,
+      "body": jsonDecode(res.body),
+    };
+  }
 
-      if (response.statusCode == 200) {
-        // Jika response berhasil
-        return jsonDecode(response.body);
-      } else {
-        // Jika response gagal
-        throw Exception('Failed to register');
+  // POST /pengaduan (multipart)
+  Future<Map<String, dynamic>> postPengaduan({
+    required String token,
+    required String judul,
+    required String deskripsi,
+    List<String>? fotoPaths,
+  }) async {
+    final uri = Uri.parse('$baseUrl/pengaduan');
+    final request = http.MultipartRequest('POST', uri);
+
+    request.headers.addAll({
+      "Authorization": "Bearer $token",
+      "accept": "application/json",
+      'ngrok-skip-browser-warning': 'true',
+    });
+
+    request.fields['judul'] = judul;
+    request.fields['deskripsi'] = deskripsi;
+
+    // Upload banyak foto
+    if (fotoPaths != null && fotoPaths.isNotEmpty) {
+      for (var path in fotoPaths) {
+        request.files.add(await http.MultipartFile.fromPath('foto[]', path));
       }
-    } catch (e) {
-      throw Exception('Failed to connect to API');
     }
+
+    final response = await request.send();
+    final resBody = await response.stream.bytesToString();
+
+    return {
+      "status": response.statusCode,
+      "body": jsonDecode(resBody),
+    };
   }
-}
 
-// Model classes sama seperti yang sudah kamu definisikan:
-class RegionPage {
-  String? message;
-  List<Daerah>? daerah;
+  Future<BeritaResponse> fetchBerita(String token) async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/berita'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "accept": "application/json",
+        'ngrok-skip-browser-warning': 'true',
+      },
+    );
 
-  RegionPage({this.message, this.daerah});
-
-  RegionPage.fromJson(Map<String, dynamic> json) {
-    message = json['message'];
-    if (json['daerah'] != null) {
-      daerah = <Daerah>[];
-      json['daerah'].forEach((v) {
-        daerah!.add(Daerah.fromJson(v));
-      });
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw Exception('Gagal load berita: ${_preview(res.body)}');
     }
+    final jsonMap = jsonDecode(res.body);
+    return BeritaResponse.fromJson(jsonMap);
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['message'] = message;
-    if (daerah != null) {
-      data['daerah'] = daerah!.map((v) => v.toJson()).toList();
+  Future<List<Pengaduan>> fetchRiwayatPengaduan(String token) async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/riwayat-pengaduan'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "accept": "application/json",
+        'ngrok-skip-browser-warning': 'true',
+      },
+    );
+
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw Exception('Gagal load riwayat pengaduan: ${_preview(res.body)}');
     }
-    return data;
-  }
-}
 
-class Daerah {
-  int? id;
-  String? namaDaerah;
-  String? createdAt;
-  String? updatedAt;
-
-  Daerah({this.id, this.namaDaerah, this.createdAt, this.updatedAt});
-
-  Daerah.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    namaDaerah = json['nama_daerah'];
-    createdAt = json['created_at'];
-    updatedAt = json['updated_at'];
+    final jsonMap = jsonDecode(res.body);
+    final List<dynamic> pengaduanList = jsonMap['pengaduan'] ?? [];
+    return pengaduanList.map((e) => Pengaduan.fromJson(e)).toList();
   }
 
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = <String, dynamic>{};
-    data['id'] = id;
-    data['nama_daerah'] = namaDaerah;
-    data['created_at'] = createdAt;
-    data['updated_at'] = updatedAt;
-    return data;
+  Future<Map<String, dynamic>> updateProfile({
+    required String token,
+    String? nama,
+    String? noHp,
+    String? alamat,
+    String? password,
+    String? fotoPath, // path file foto
+  }) async {
+    final uri = Uri.parse('$baseUrl/updateProfile');
+    final request = http.MultipartRequest('POST', uri);
+
+    request.headers.addAll({
+      "Authorization": "Bearer $token",
+      "accept": "application/json",
+      'ngrok-skip-browser-warning': 'true',
+    });
+
+    // field biasa
+    if (nama != null) request.fields['nama'] = nama;
+    if (noHp != null) request.fields['no_hp'] = noHp;
+    if (alamat != null) request.fields['alamat'] = alamat;
+    if (password != null) request.fields['password'] = password;
+
+    // file foto
+    if (fotoPath != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('foto', fotoPath),
+      );
+    }
+
+    // kirim
+    final response = await request.send();
+    final resBody = await response.stream.bytesToString();
+
+    return {
+      "status": response.statusCode,
+      "body": jsonDecode(resBody),
+    };
   }
 }
