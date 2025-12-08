@@ -75,9 +75,16 @@ class ApiService {
     return clean.length <= max ? clean : '${clean.substring(0, max)}...';
   }
 
-// Class ApiService baru dengan request registerUser menggunakan POST, dan parameter tambahan 'region'
-class ApiServiceRegister {
-  final String _baseUrl = "https://firmly-splendid-dove.ngrok-free.app/api/register"; // Ganti dengan URL API yang sesuai
+  // POST /logout
+  Future<Map<String, dynamic>> logoutUser(String token) async {
+    final res = await http.post(
+      Uri.parse('$baseUrl/logout'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "accept": "application/json",
+        'ngrok-skip-browser-warning': 'true',
+      },
+    );
 
     return {
       "status": res.statusCode,

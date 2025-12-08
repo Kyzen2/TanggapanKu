@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:tanggapanku/pages/timeline_page.dart';
 import 'package:tanggapanku/api/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tanggapanku/pages/register.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -253,7 +254,14 @@ class _LoginPageState extends State<LoginPage> {
                     SizedBox(
                       width: double.infinity,
                       child: OutlinedButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const RegisterPage(),
+                            ),
+                          );
+                        },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: accentBlue,
                           side: const BorderSide(
