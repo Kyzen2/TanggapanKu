@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:tanggapanku/api/api_service.dart';
 import 'package:tanggapanku/models/pengaduan.dart';
+import 'package:tanggapanku/pages/detail_riwayat_pengaduan.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RiwayatPengaduanPage extends StatefulWidget {
@@ -213,7 +214,14 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
             ),
             const SizedBox(height: 2),
             InkWell(
-              onTap: () {},
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DetailRiwayatPengaduanPage(),
+                  ),
+                );
+              },
               child: Text(
                 'Lihat Progress Laporan',
                 style: GoogleFonts.poppins(
@@ -224,6 +232,7 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
                 ),
               ),
             ),
+
             const SizedBox(height: 7),
             Align(
               alignment: Alignment.bottomRight,
