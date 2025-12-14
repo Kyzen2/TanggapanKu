@@ -141,8 +141,14 @@ class _PengaduanPageState extends State<PengaduanPage> {
     return Scaffold(
       backgroundColor: lightGrey,
       appBar: AppBar(
-        backgroundColor: primaryBlueDark,
-        title: const Text("TanggapanKU"),
+        backgroundColor: const Color(0xFF2E2A6A),
+        title: Text(
+          "TanggapanKU",
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(screenWidth * 0.05),
@@ -191,10 +197,13 @@ class _PengaduanPageState extends State<PengaduanPage> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF2E2A6A),
+                ),
                 onPressed: _loading ? null : _submitPengaduan,
                 child: _loading
                     ? const CircularProgressIndicator(color: Colors.white)
-                    : const Text("Kirim Laporan"),
+                    : const Text("Kirim Laporan", style: TextStyle(color: Colors.white)),
               ),
             )
           ],
