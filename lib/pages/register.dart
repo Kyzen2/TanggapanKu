@@ -239,11 +239,11 @@ class _RegisterPageState extends State<RegisterPage> {
       child: Stack(
         children: [
           Positioned(
-            bottom: -h * 0.05,
-            right: -w * 0.1,
+            bottom: -h * 0.16,
+            right: -w * 0.07,
             child: Image.asset(
               'assets/egi.png',
-              height: h * 0.50,
+              height: h * 0.65,
               fit: BoxFit.fitHeight,
             ),
           ),
@@ -257,7 +257,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     Text(
                       'Daftar',
                       style: GoogleFonts.poppins(
-                        fontSize: w * 0.07,
+                        fontSize: w * 0.05,
                         fontWeight: FontWeight.w600,
                         color: Colors.white,
                       ),
@@ -273,16 +273,16 @@ class _RegisterPageState extends State<RegisterPage> {
                 Text(
                   'TanggapanKU',
                   style: GoogleFonts.poppins(
-                    fontSize: w * 0.08,
+                    fontSize: w * 0.06,
                     fontWeight: FontWeight.bold,
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(height: h * 0.02),
+                SizedBox(height: h * 0.05),
                 Text(
                   '"Pengaduan warga menjadi\nmudah dan praktis."',
                   style: GoogleFonts.poppins(
-                    fontSize: w * 0.045,
+                    fontSize: w * 0.035,
                     color: Colors.white70,
                     height: 1.4,
                   ),
