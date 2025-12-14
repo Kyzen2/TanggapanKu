@@ -26,7 +26,11 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.poppinsTextTheme(),
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00B6A0)),
       ),
+<<<<<<< HEAD
       home: const RegisterPage(),
+=======
+      home: const SplashScreen(),
+>>>>>>> c749c1461d1d2d3fd41cdc208a1f152dd550e023
     );
   }
 }
