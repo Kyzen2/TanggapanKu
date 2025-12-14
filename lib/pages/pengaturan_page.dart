@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tanggapanku/models/warga.dart';
 import 'package:tanggapanku/pages/login.dart';
@@ -73,98 +74,133 @@ class _AkunPageState extends State<AkunPage> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: const Color(0xFF2E2A6A),
+        title: Text(
+          "TanggapanKU",
+          style: GoogleFonts.poppins(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: const BorderRadius.only(
+                  topLeft: Radius.circular(14),
+                  topRight: Radius.circular(14),
+                  bottomLeft: Radius.circular(5),
+                  bottomRight: Radius.circular(5),
+                ),
                 border: Border.all(color: Colors.grey.shade300),
                 color: Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.06),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  )
-                ],
               ),
               child: Column(
+                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      CircleAvatar(
-                        radius: 24,
-                        backgroundColor: Colors.grey,
-                        backgroundImage:
-                            widget.warga.foto != null && widget.warga.foto!.isNotEmpty
-                                ? NetworkImage(widget.warga.foto!)
-                                : null,
-                      ),
-                      const SizedBox(width: 14),
-                      Expanded(
-                        child: Column(
+                  Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      children: [
+                        Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(
-                              widget.warga.nama ?? "Nama tidak tersedia",
-                              style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 16),
+                            CircleAvatar(
+                              radius: 24,
+                              backgroundColor: Colors.grey,
+                              backgroundImage: widget.warga.foto != null &&
+                                      widget.warga.foto!.isNotEmpty
+                                  ? NetworkImage(widget.warga.foto!)
+                                  : null,
                             ),
-                            const SizedBox(height: 3),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    widget.warga.nama ?? "Nama tidak tersedia",
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    "Alamat: ${widget.warga.alamat ?? '-'}",
+                                    style: TextStyle(
+                                      color: Colors.grey.shade700,
+                                      fontSize: 13,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const Icon(Icons.phone, size: 18),
+                            const SizedBox(width: 6),
                             Text(
-                              "Alamat: ${widget.warga.alamat ?? '-'}",
-                              style: TextStyle(
-                                  color: Colors.grey.shade700, fontSize: 13),
+                              widget.warga.noHp ?? "-",
+                              style: const TextStyle(fontSize: 13),
                             ),
                           ],
                         ),
-                      ),
-                      const SizedBox(width: 10),
-                      const Icon(Icons.phone, size: 18),
-                      const SizedBox(width: 6),
-                      Text(
-                        widget.warga.noHp ?? "-",
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-                  Align(
-                    alignment: Alignment.centerRight,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor:
-                            const Color.fromARGB(255, 255, 255, 255),
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 18, vertical: 8),
-                        shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(6)),
-                      ),
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => ProfilePage(
-                              user: widget.warga,
-                              token: token!, // FIX
+                        const SizedBox(height: 14),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 8,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => ProfilePage(
+                                    user: widget.warga,
+                                    token: token!,
+                                  ),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              "Edit Profil",
+                              style:
+                                  TextStyle(fontSize: 13, color: Colors.black),
                             ),
                           ),
-                        );
-                      },
-                      child: const Text(
-                        "Edit Profil",
-                        style: TextStyle(fontSize: 13),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  Container(
+                    height: 6,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF2E2A6A),
+                      borderRadius: BorderRadius.only(
+                        bottomLeft: Radius.circular(14),
+                        bottomRight: Radius.circular(14),
                       ),
                     ),
                   ),
                 ],
               ),
             ),
+
+
 
             const SizedBox(height: 32),
 
