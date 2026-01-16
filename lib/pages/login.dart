@@ -157,70 +157,69 @@ class _LoginPageState extends State<LoginPage> {
                   horizontal: screenWidth * 0.07,
                   vertical: screenHeight * 0.04,
                 ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextField(
-                      controller: nikC,
-                      decoration: InputDecoration(
-                        hintText: 'NIK',
-                        filled: true,
-                        fillColor: Colors.white,
-                        prefixIcon: Icon(
-                          Icons.person,
-                          color: Colors.grey,
-                          size: screenWidth * 0.06,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                    TextField(
-                      controller: passC,
-                      obscureText: !_isPasswordVisible,
-                      decoration: InputDecoration(
-                        hintText: 'Password',
-                        filled: true,
-                        fillColor: Colors.white,
-                        prefixIcon: Icon(
-                          Icons.lock,
-                          color: Colors.grey,
-                          size: screenWidth * 0.06,
-                        ),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _isPasswordVisible
-                                ? Icons.visibility
-                                : Icons.visibility_off,
+                child: SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextField(
+                        controller: nikC,
+                        decoration: InputDecoration(
+                          hintText: 'NIK',
+                          prefixIcon: Icon(
+                            Icons.person,
+                            color: Colors.grey,
+                            size: screenWidth * 0.06,
                           ),
-                          onPressed: () {
-                            setState(() {
-                              _isPasswordVisible = !_isPasswordVisible;
-                            });
-                          },
-                        ),
-                      ),
-                    ),
-                    Align(
-                      alignment: Alignment.centerRight,
-                      child: TextButton(
-                        onPressed: () {},
-                        child: Text(
-                          'Lupa Password?',
-                          style: GoogleFonts.poppins(
-                            color: accentBlue,
-                            fontWeight: FontWeight.w600,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
                           ),
                         ),
                       ),
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
+                      SizedBox(height: screenHeight * 0.02),
+                      TextField(
+                        controller: passC,
+                        obscureText: !_isPasswordVisible,
+                        decoration: InputDecoration(
+                          hintText: 'Password',
+                          prefixIcon: Icon(
+                            Icons.lock,
+                            color: Colors.grey,
+                            size: screenWidth * 0.06,
+                          ),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          suffixIcon: IconButton(
+                            icon: Icon(
+                              _isPasswordVisible
+                                  ? Icons.visibility
+                                  : Icons.visibility_off,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isPasswordVisible = !_isPasswordVisible;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.01),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: () {},
+                          child: Text(
+                            'Lupa Password?',
+                            style: GoogleFonts.poppins(
+                              color: accentBlue,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ),
+                      SizedBox(height: screenHeight * 0.015),
+                      ElevatedButton(
                         onPressed: _loading ? null : login,
                         style: ElevatedButton.styleFrom(
                           backgroundColor: accentBlue,
@@ -233,8 +232,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         child: _loading
                             ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
+                                color: Colors.white)
                             : Text(
                                 'Masuk',
                                 style: GoogleFonts.poppins(
@@ -244,16 +242,15 @@ class _LoginPageState extends State<LoginPage> {
                                 ),
                               ),
                       ),
-                    ),
-                    Text(
-                      'Belum punya akun?',
-                      style: GoogleFonts.poppins(
-                        color: Colors.grey[700],
+                      SizedBox(height: screenHeight * 0.02),
+                      Center(
+                        child: Text(
+                          'Belum punya akun?',
+                          style: GoogleFonts.poppins(color: Colors.grey[700]),
+                        ),
                       ),
-                    ),
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton(
+                      SizedBox(height: screenHeight * 0.01),
+                      OutlinedButton(
                         onPressed: () {
                           Navigator.push(
                             context,
@@ -264,10 +261,7 @@ class _LoginPageState extends State<LoginPage> {
                         },
                         style: OutlinedButton.styleFrom(
                           foregroundColor: accentBlue,
-                          side: const BorderSide(
-                            color: accentBlue,
-                            width: 2,
-                          ),
+                          side: const BorderSide(color: accentBlue, width: 2),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(10),
                           ),
@@ -277,17 +271,17 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         child: Text(
                           'Daftar',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                          ),
+                          style:
+                              GoogleFonts.poppins(fontWeight: FontWeight.bold),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
+
         ],
       ),
     );

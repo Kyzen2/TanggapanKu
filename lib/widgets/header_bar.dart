@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class HeaderBar extends StatelessWidget {
   final String userName; // Nama user yang dikirim dari halaman sebelumnya
@@ -68,22 +69,30 @@ class HeaderBar extends StatelessWidget {
           // ICON 1 (Contoh bisa diganti)
           Container(
             padding: const EdgeInsets.all(8),
-            decoration: const BoxDecoration(
-              color: Color(0xFF00B6A0),
-              shape: BoxShape.circle,
+            child: Image.asset(
+              'assets/logo.png',
+              width: 40,
+              height: 40,
+              fit: BoxFit.contain,
             ),
-            child: const Icon(Icons.ac_unit, color: Colors.white, size: 18),
           ),
+
 
           const SizedBox(width: 10),
 
           // ICON NOTIFICATION / SETTINGS
-          IconButton(
-            onPressed: () {
-              // TODO: handle notifikasi
-            },
-            icon: const Icon(Icons.notifications_active,
-                color: Color(0xFF7D54DF)),
+          Row(
+            children: [
+              const Icon(Icons.circle, color: Colors.green, size: 10),
+              const SizedBox(width: 4),
+              Text(
+                "Layanan Aktif",
+                style: GoogleFonts.poppins(
+                  fontSize: 11,
+                  color: Colors.green,
+                ),
+              ),
+            ],
           ),
         ],
       ),

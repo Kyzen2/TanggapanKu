@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:animate_do/animate_do.dart';
+import 'package:flutter_markdown/flutter_markdown.dart';
+import 'package:gap/gap.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tanggapanku/models/warga.dart';
@@ -211,12 +214,45 @@ class _AkunPageState extends State<AkunPage> {
 
             const SizedBox(height: 16),
 
-            _menuItem(context, Icons.person, "Informasi Data Pribadi", () {}),
-            _menuItem(context, Icons.notifications, "Penyesuaian Notifikasi", () {}),
-            _menuItem(context, Icons.article, "Syarat dan Ketentuan Aplikasi", () {}),
+            _menuItem(
+              context,
+              Icons.article,
+              "Syarat dan Ketentuan Aplikasi",
+              () {
+                showModalBottomSheet(
+                  context: context,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(20),
+                    ),
+                  ),
+                  isScrollControlled: true,
+                  builder: (context) {
+                    return _syaratDanKetentuanSheet(context);
+                  },
+                );
+              },
+            ),
+
             _menuItem(context, Icons.menu_book, "Panduan Penggunaan Aplikasi", () {}),
-            _menuItem(context, Icons.help_outline, "Pertanyaan Umum", () {}),
-            _menuItem(context, Icons.settings, "Pengaturan Lainnya", () {}),
+            _menuItem(
+              context,
+              Icons.help_outline,
+              "Pertanyaan Umum",
+              () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  shape: const RoundedRectangleBorder(
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(20)),
+                  ),
+                  builder: (context) => _faqBottomSheet(context),
+                );
+              },
+            ),
+
+            _menuItem(context, Icons.support_agent, "Hubungi Kami", () {}),
 
             const SizedBox(height: 20),
 
@@ -283,3 +319,281 @@ class _AkunPageState extends State<AkunPage> {
     );
   }
 }
+
+// ================ SYARAT DAN KETENTUAN SHEET ==================
+Widget _syaratDanKetentuanSheet(BuildContext context) {
+  return FadeInUp(
+    duration: const Duration(milliseconds: 400),
+    child: DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.65,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      builder: (context, scrollController) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+
+              const Gap(14),
+
+              Text(
+                "Syarat & Ketentuan Aplikasi",
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+
+              const Gap(12),
+
+              /// ISI SYARAT (Markdown + scroll sinkron)
+              Expanded(
+                child: Markdown(
+                  controller: scrollController,
+                  data: _syaratMarkdown,
+                  styleSheet: MarkdownStyleSheet(
+                    p: GoogleFonts.poppins(fontSize: 13),
+                    h3: GoogleFonts.poppins(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
+                    listBullet: GoogleFonts.poppins(fontSize: 13),
+                  ),
+                ),
+              ),
+
+              const Gap(12),
+
+              /// TOMBOL SETUJU
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "Setuju & Lanjutkan",
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    ),
+  );
+}
+
+const String _syaratMarkdown = """
+### 1. Ketentuan Umum
+Dengan menggunakan aplikasi ini, pengguna dianggap telah membaca dan menyetujui seluruh ketentuan yang berlaku.
+
+### 2. Akun & Keamanan
+- Pengguna bertanggung jawab atas keamanan akun masing-masing  
+- Dilarang membagikan informasi login kepada pihak lain  
+- Aktivitas mencurigakan dapat menyebabkan pembatasan akun  
+
+### 3. Privasi & Data
+Kami menjaga data pribadi pengguna sesuai dengan kebijakan privasi:
+- Data tidak diperjualbelikan  
+- Data hanya digunakan untuk kebutuhan layanan  
+- Pengguna berhak meminta penghapusan data  
+
+### 4. Larangan Penggunaan
+Pengguna **tidak diperkenankan**:
+- Menyalahgunakan fitur aplikasi  
+- Melakukan tindakan yang merugikan pihak lain  
+- Menggunakan aplikasi untuk tujuan ilegal  
+
+### 5. Perubahan Ketentuan
+Syarat dan ketentuan dapat diperbarui sewaktu-waktu. Pengguna disarankan untuk memeriksa halaman ini secara berkala.
+
+### 6. Penutup
+Dengan menekan tombol **Setuju**, pengguna menyatakan sepakat tanpa paksaan dari pihak manapun.
+""";
+// ================ SYARAT DAN KETENTUAN SHEET ==================
+// ================ PERTANYAAN UMUM SHEET ==================
+
+Widget _faqBottomSheet(BuildContext context) {
+  return FadeInUp(
+    duration: const Duration(milliseconds: 400),
+    child: DraggableScrollableSheet(
+      expand: false,
+      initialChildSize: 0.6,
+      minChildSize: 0.4,
+      maxChildSize: 0.95,
+      builder: (context, scrollController) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 16,
+            right: 16,
+            top: 16,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 8,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 42,
+                  height: 5,
+                  decoration: BoxDecoration(
+                    color: Colors.grey[400],
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+              ),
+
+              const Gap(14),
+
+              Text(
+                "Pertanyaan Umum",
+                style: GoogleFonts.poppins(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+
+              const Gap(4),
+
+              Text(
+                "Seputar pengaduan dan keluhan warga",
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+
+              const Gap(12),
+
+              /// LIST FAQ
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  children: [
+                    _faqItem(
+                      question: "Apa itu aplikasi TanggapanKu?",
+                      answer:
+                          "Aplikasi ini digunakan oleh warga untuk melaporkan permasalahan yang terjadi di lingkungan sekitar, seperti sampah menumpuk, jalan rusak, lampu mati, atau fasilitas umum lainnya.",
+                    ),
+                    _faqItem(
+                      question: "Keluhan apa saja yang bisa dilaporkan?",
+                      answer:
+                          "Berbagai permasalahan di lapangan dapat dilaporkan, antara lain:\n"
+                          "• Sampah menumpuk\n"
+                          "• Jalan berlubang atau rusak\n"
+                          "• Saluran air tersumbat\n"
+                          "• Lampu penerangan mati\n"
+                          "• Fasilitas umum rusak",
+                    ),
+                    _faqItem(
+                      question: "Bagaimana cara mengirim pengaduan?",
+                      answer:
+                          "Pengguna dapat mengisi formulir pengaduan dengan menekan tombol + di tengah, dan menuliskan deskripsi masalah, serta melampirkan foto kondisi di lapangan agar laporan lebih akurat.",
+                    ),
+                    _faqItem(
+                      question: "Apakah laporan saya akan ditindaklanjuti?",
+                      answer:
+                          "Setiap laporan yang masuk akan diverifikasi terlebih dahulu. Jika valid, laporan akan diteruskan kepada pihak terkait untuk ditindaklanjuti sesuai kewenangan.",
+                    ),
+                    _faqItem(
+                      question: "Apakah identitas saya aman?",
+                      answer:
+                          "Ya. Identitas pelapor dijaga kerahasiaannya dan hanya digunakan untuk keperluan verifikasi laporan.",
+                    ),
+                    _faqItem(
+                      question: "Berapa lama laporan diproses?",
+                      answer:
+                          "Waktu penanganan bergantung pada jenis dan tingkat urgensi laporan. Status laporan dapat dipantau langsung melalui aplikasi.",
+                    ),
+                  ],
+                ),
+              ),
+
+              const Gap(12),
+
+              /// BUTTON TUTUP
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: Text(
+                    "Tutup",
+                    style: GoogleFonts.poppins(
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    ),
+  );
+}
+Widget _faqItem({
+  required String question,
+  required String answer,
+}) {
+  return Card(
+    margin: const EdgeInsets.only(bottom: 8),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+    ),
+    child: ExpansionTile(
+      title: Text(
+        question,
+        style: GoogleFonts.poppins(
+          fontSize: 13.5,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      childrenPadding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+      children: [
+        Text(
+          answer,
+          style: GoogleFonts.poppins(
+            fontSize: 12.5,
+            color: Colors.grey[700],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+// ================ PERTANYAAN UMUM SHEET ==================
