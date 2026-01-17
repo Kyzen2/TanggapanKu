@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tanggapanku/models/warga.dart';
 import 'package:tanggapanku/pages/login.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:tanggapanku/pages/profile_page.dart';
 import 'package:tanggapanku/api/api_service.dart';
 
@@ -32,6 +33,25 @@ class _AkunPageState extends State<AkunPage> {
     setState(() {
       token = prefs.getString("token");
     });
+  }
+
+  Future<void> _hubungiKami() async {
+    const phone = '628131128454';
+    const message =
+        'Halo Admin TanggapanKu, saya mau bertanya terkait aplikasi';
+
+    final url = Uri.parse(
+      'https://wa.me/$phone?text=${Uri.encodeComponent(message)}',
+    );
+
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.externalApplication,
+    )) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('WhatsApp tidak ditemukan')),
+      );
+    }
   }
 
   void logout(BuildContext context) async {
@@ -188,7 +208,6 @@ class _AkunPageState extends State<AkunPage> {
                       ],
                     ),
                   ),
-
                   Container(
                     height: 6,
                     decoration: const BoxDecoration(
@@ -202,18 +221,12 @@ class _AkunPageState extends State<AkunPage> {
                 ],
               ),
             ),
-
-
-
             const SizedBox(height: 32),
-
             const Text(
               "Pengaturan",
               style: TextStyle(fontSize: 19, fontWeight: FontWeight.w700),
             ),
-
             const SizedBox(height: 16),
-
             _menuItem(
               context,
               Icons.article,
@@ -233,8 +246,8 @@ class _AkunPageState extends State<AkunPage> {
                 );
               },
             ),
-
-            _menuItem(context, Icons.menu_book, "Panduan Penggunaan Aplikasi", () {}),
+            _menuItem(
+                context, Icons.menu_book, "Panduan Penggunaan Aplikasi", () {}),
             _menuItem(
               context,
               Icons.help_outline,
@@ -252,10 +265,14 @@ class _AkunPageState extends State<AkunPage> {
               },
             ),
 
-            _menuItem(context, Icons.support_agent, "Hubungi Kami", () {}),
-
+            _menuItem(
+              context,
+              Icons.support_agent,
+              "Hubungi Kami",
+              _hubungiKami,
+            ),
+            
             const SizedBox(height: 20),
-
             Center(
               child: GestureDetector(
                 onTap: () {
@@ -292,7 +309,6 @@ class _AkunPageState extends State<AkunPage> {
                 ),
               ),
             ),
-
             const SizedBox(height: 40),
           ],
         ),
@@ -564,6 +580,7 @@ Widget _faqBottomSheet(BuildContext context) {
     ),
   );
 }
+
 Widget _faqItem({
   required String question,
   required String answer,
@@ -594,6 +611,5 @@ Widget _faqItem({
     ),
   );
 }
-
 
 // ================ PERTANYAAN UMUM SHEET ==================
