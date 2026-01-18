@@ -20,7 +20,7 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final purple = const Color(0xFF7D54DF);
+  final purple = const Color(0xFF2E2A6A);
   
 
   // Controller
@@ -137,6 +137,7 @@ class _ProfilePageState extends State<ProfilePage> {
                         height: 135,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
+                          color: purple,
                           boxShadow: [
                             BoxShadow(
                               color: purple.withOpacity(0.3),
@@ -145,41 +146,11 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                           ],
                           border: Border.all(color: purple, width: 3),
-                          image: DecorationImage(
-                            fit: BoxFit.cover,
-                            image: pickedFotoPath != null
-                                ? FileImage(File(pickedFotoPath!))
-                                : (widget.user.foto != null
-                                    ? NetworkImage(
-                                        "https://firmly-splendid-dove.ngrok-free.app/storage/${widget.user.foto}",
-                                      ) as ImageProvider
-                                    : const NetworkImage(
-                                        'https://i.pinimg.com/736x/d7/0b/12/d70b12e501a967030a9f017edbdfbead.jpg',
-                                      )),
-                          ),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: pickFoto,
-                        child: Container(
-                          width: 38,
-                          height: 38,
-                          decoration: BoxDecoration(
-                            color: purple,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: purple.withOpacity(0.4),
-                                blurRadius: 8,
-                                offset: const Offset(0, 3),
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.edit_rounded,
-                            color: Colors.white,
-                            size: 20,
-                          ),
+                        child: const Icon(
+                          Icons.person_outline,
+                          color: Colors.white,
+                          size: 70,
                         ),
                       ),
                     ],
@@ -306,7 +277,7 @@ class _ProfilePageState extends State<ProfilePage> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide:
-                  const BorderSide(color: Color(0xFF7D54DF), width: 1.2),
+                  const BorderSide(color: Color(0xFF2E2A6A), width: 1.2),
             ),
           ),
         ),

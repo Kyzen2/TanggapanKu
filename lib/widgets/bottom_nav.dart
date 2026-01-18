@@ -36,15 +36,15 @@ class FloatingNav extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => PengaduanPage(),
+                  builder: (_) => const PengaduanPage(),
                 ),
               );
             },
             child: Container(
               width: 48,
               height: 48,
-              decoration: BoxDecoration(
-                color: const Color(0xFF7D54DF),
+              decoration: const BoxDecoration(
+                color: Color(0xFF2E2A6A),
                 shape: BoxShape.circle,
               ),
               child: const Icon(Icons.add, color: Colors.white, size: 26),

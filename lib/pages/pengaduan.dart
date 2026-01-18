@@ -142,12 +142,22 @@ class _PengaduanPageState extends State<PengaduanPage> {
       backgroundColor: lightGrey,
       appBar: AppBar(
         backgroundColor: const Color(0xFF2E2A6A),
-        title: Text(
-          "TanggapanKU",
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/Logo.png',
+              height: 22,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              "TanggapanKU",
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(

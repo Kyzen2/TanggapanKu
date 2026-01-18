@@ -47,7 +47,7 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
     return Scaffold(
       backgroundColor: white,
       appBar: AppBar(
-        backgroundColor: backgroundBlue,
+        backgroundColor: const Color(0xFF2E2A6A),
         elevation: 0,
         title: Row(
           children: [

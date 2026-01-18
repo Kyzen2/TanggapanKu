@@ -99,12 +99,23 @@ class _AkunPageState extends State<AkunPage> {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xFF2E2A6A),
-        title: Text(
-          "TanggapanKU",
-          style: GoogleFonts.poppins(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/Logo.png',
+              height: 22,
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              "TanggapanKU",
+              style: GoogleFonts.poppins(
+                color: Colors.white,
+                // fontSize: ,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
         ),
       ),
       body: SingleChildScrollView(
@@ -133,13 +144,14 @@ class _AkunPageState extends State<AkunPage> {
                         Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            CircleAvatar(
+                            const CircleAvatar(
                               radius: 24,
                               backgroundColor: Colors.grey,
-                              backgroundImage: widget.warga.foto != null &&
-                                      widget.warga.foto!.isNotEmpty
-                                  ? NetworkImage(widget.warga.foto!)
-                                  : null,
+                              child: Icon(
+                                Icons.person_outline,
+                                color: Colors.white,
+                                size: 28,
+                              ),
                             ),
                             const SizedBox(width: 14),
                             Expanded(

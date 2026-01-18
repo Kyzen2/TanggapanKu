@@ -27,16 +27,17 @@ class HeaderBar extends StatelessWidget {
           // FOTO PROFIL
           InkWell(
             borderRadius: BorderRadius.circular(20),
-            onTap: () {
-              // TODO: buka halaman profile
-            },
-            child: CircleAvatar(
+            child: const CircleAvatar(
               radius: 23,
-              backgroundImage: profileImageUrl != null
-                  ? NetworkImage(profileImageUrl!)
-                  : const NetworkImage('https://i.pravatar.cc/100?img=10'),
+              backgroundColor: Colors.grey,
+              child: Icon(
+                Icons.person_outline,
+                color: Colors.white,
+                size: 26,
+              ),
             ),
           ),
+
 
           const SizedBox(width: 12),
 
@@ -66,7 +67,6 @@ class HeaderBar extends StatelessWidget {
             ),
           ),
 
-          // ICON 1 (Contoh bisa diganti)
           Container(
             padding: const EdgeInsets.all(8),
             child: Image.asset(
