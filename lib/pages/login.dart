@@ -90,8 +90,8 @@ class _LoginPageState extends State<LoginPage> {
               child: Stack(
                 children: [
                   Positioned(
-                    bottom: -20,
-                    right: 0,
+                    bottom: -130,
+                    right: -50,
                     child: Image.asset(
                       'assets/egi.png',
                       height: screenHeight * 0.9,
