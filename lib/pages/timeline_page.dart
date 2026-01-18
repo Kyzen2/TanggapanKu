@@ -77,7 +77,7 @@ class _TimelinePageState extends State<TimelinePage> {
       final api = ApiService();
       final allNews = await api.fetchBeritaByDaerah(token);
 
-      beritaBantuan = allNews.where((b) => b.kategori == "bantuan").toList();
+      beritaBantuan = allNews.where((b) => b.kategori == "Bantuan").toList();
       beritaUmum = allNews.where((b) => b.kategori == "umum").toList();
     } catch (e) {
       debugPrint("Error load berita: $e");
