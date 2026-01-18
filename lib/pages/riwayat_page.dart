@@ -126,6 +126,7 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
 
                       return _buildPengaduanCard(
                         context,
+                        pengaduan: p,
                         judul: p.judul,
                         tanggal: p.tglPengaduan,
                         catatan: catatan,
@@ -160,6 +161,7 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
 
   Widget _buildPengaduanCard(
     BuildContext context, {
+    required Pengaduan pengaduan,
     required String judul,
     required String tanggal,
     required String catatan,
@@ -218,7 +220,8 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const DetailRiwayatPengaduanPage(),
+                    builder: (context) =>
+                        DetailRiwayatPengaduanPage(pengaduan: pengaduan),
                   ),
                 );
               },
@@ -232,7 +235,6 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
                 ),
               ),
             ),
-
             const SizedBox(height: 7),
             Align(
               alignment: Alignment.bottomRight,

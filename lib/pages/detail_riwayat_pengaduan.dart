@@ -2,42 +2,62 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:intl/intl.dart';
+import 'package:tanggapanku/api/api_service.dart';
+import 'package:tanggapanku/models/pengaduan.dart';
 
 class DetailRiwayatPengaduanPage extends StatefulWidget {
-  const DetailRiwayatPengaduanPage({super.key});
+  final Pengaduan pengaduan;
+
+  const DetailRiwayatPengaduanPage({
+    super.key,
+    required this.pengaduan,
+  });
 
   @override
-  State<DetailRiwayatPengaduanPage> createState() => _RiwayatPengaduanPageState();
+  State<DetailRiwayatPengaduanPage> createState() =>
+      _DetailRiwayatPengaduanPageState();
 }
 
-class _RiwayatPengaduanPageState extends State<DetailRiwayatPengaduanPage> {
+class _DetailRiwayatPengaduanPageState
+    extends State<DetailRiwayatPengaduanPage> {
   final PageController _pageController = PageController();
-  final List<String> images = [
-    'https://i.imgur.com/7RrX4Yv.png',
-    'https://i.imgur.com/7RrX4Yv.png',
-    'https://i.imgur.com/7RrX4Yv.png',
-  ];
+
+  late final List<String> images;
+
+  @override
+  void initState() {
+    super.initState();
+    images = widget.pengaduan.foto
+        .where((e) => e.pathFoto.isNotEmpty)
+        .map((e) => 'https://firmly-splendid-dove.ngrok-free.app/${e.pathFoto}')
+        .toList();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final pengaduan = widget.pengaduan;
+
     return Scaffold(
       backgroundColor: const Color(0xFFF5F6FA),
       appBar: AppBar(
         backgroundColor: const Color(0xFF2E2A6A),
         title: Text(
-          'Riwayat Pengaduan',
+          'Detail Pengaduan',
           style: GoogleFonts.poppins(
             color: Colors.white,
             fontWeight: FontWeight.w600,
           ),
         ),
-        leading: const Icon(Icons.arrow_back, color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => Navigator.pop(context),
+        ),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            _pengaduanCard(),
+            _pengaduanCard(pengaduan),
             const Spacer(),
             _backButton(),
           ],
@@ -46,7 +66,9 @@ class _RiwayatPengaduanPageState extends State<DetailRiwayatPengaduanPage> {
     );
   }
 
-  Widget _pengaduanCard() {
+  Widget _pengaduanCard(Pengaduan p) {
+    final tanggal = DateTime.tryParse(p.tglPengaduan);
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
@@ -65,25 +87,50 @@ class _RiwayatPengaduanPageState extends State<DetailRiwayatPengaduanPage> {
         children: [
           _userHeader(),
           const SizedBox(height: 12),
+
+          /// JUDUL
           Text(
-            'Game Roblox mengubah IQ anak anak indonesia',
+            p.judul,
             style: GoogleFonts.poppins(
               fontWeight: FontWeight.w600,
               fontSize: 15,
             ),
           ),
+
           const SizedBox(height: 6),
+
+          /// DESKRIPSI
           Text(
-            '24 Oktober 2025 - Polisi berhasil mengungkap kasus pengaduan terhadap anak di bawah umur yang terjadi di wilayah Mc Gacoan, Kota Cianjur, Kecamatan Cianjur.',
+            p.deskripsi,
             style: GoogleFonts.poppins(
               fontSize: 13,
               color: Colors.grey[700],
             ),
           ),
+
           const SizedBox(height: 12),
-          _imageSlider(),
+
+          /// FOTO
+          if (images.isNotEmpty) _imageSlider(),
+
           const SizedBox(height: 12),
-          _footer(),
+
+          /// FOOTER
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                tanggal != null
+                    ? DateFormat('dd MMM yyyy, HH:mm').format(tanggal)
+                    : '-',
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+              _statusBadge(p.status),
+            ],
+          ),
         ],
       ),
     );
@@ -99,7 +146,7 @@ class _RiwayatPengaduanPageState extends State<DetailRiwayatPengaduanPage> {
         ),
         const SizedBox(width: 10),
         Text(
-          'Wendy Haryadi',
+          'Warga',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w500,
           ),
@@ -111,8 +158,8 @@ class _RiwayatPengaduanPageState extends State<DetailRiwayatPengaduanPage> {
   Widget _imageSlider() {
     return Column(
       children: [
-        SizedBox(
-          height: 160,
+        AspectRatio(
+          aspectRatio: 16 / 9,
           child: PageView.builder(
             controller: _pageController,
             itemCount: images.length,
@@ -122,6 +169,14 @@ class _RiwayatPengaduanPageState extends State<DetailRiwayatPengaduanPage> {
                 child: Image.network(
                   images[index],
                   fit: BoxFit.cover,
+                  errorBuilder: (_, __, ___) =>
+                      const Center(child: Icon(Icons.broken_image)),
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return const Center(
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    );
+                  },
                 ),
               );
             },
@@ -131,44 +186,47 @@ class _RiwayatPengaduanPageState extends State<DetailRiwayatPengaduanPage> {
         SmoothPageIndicator(
           controller: _pageController,
           count: images.length,
-          effect: WormEffect(
+          effect: const WormEffect(
             dotHeight: 8,
             dotWidth: 8,
-            activeDotColor: const Color(0xFF2E2A6A),
+            activeDotColor: Color(0xFF2E2A6A),
           ),
         ),
       ],
     );
   }
 
-  Widget _footer() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          DateFormat('dd MMM yyyy, HH:mm')
-              .format(DateTime(2025, 10, 25, 17, 53)),
-          style: GoogleFonts.poppins(
-            fontSize: 12,
-            color: Colors.grey,
-          ),
+  Widget _statusBadge(String status) {
+    Color color;
+
+    switch (status) {
+      case 'Selesai':
+        color = Colors.green;
+        break;
+      case 'Ditolak':
+        color = Colors.red;
+        break;
+      case 'Diproses':
+        color = Colors.orange;
+        break;
+      default:
+        color = Colors.grey;
+    }
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        status,
+        style: GoogleFonts.poppins(
+          fontSize: 12,
+          color: Colors.white,
+          fontWeight: FontWeight.w500,
         ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-          decoration: BoxDecoration(
-            color: Colors.orange,
-            borderRadius: BorderRadius.circular(20),
-          ),
-          child: Text(
-            'Peninjauan',
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              color: Colors.white,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        )
-      ],
+      ),
     );
   }
 
@@ -183,9 +241,7 @@ class _RiwayatPengaduanPageState extends State<DetailRiwayatPengaduanPage> {
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        onPressed: () {
-          Navigator.pop(context);
-        },
+        onPressed: () => Navigator.pop(context),
         child: Text(
           'Kembali',
           style: GoogleFonts.poppins(
