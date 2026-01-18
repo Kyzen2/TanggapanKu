@@ -147,7 +147,6 @@ class TimelinePageContent extends StatelessWidget {
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
             SliverToBoxAdapter(child: HeaderBar(userName: userName)),
-
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
@@ -164,16 +163,51 @@ class TimelinePageContent extends StatelessWidget {
                         items: sliderItems.map((b) {
                           return ClipRRect(
                             borderRadius: BorderRadius.circular(16),
-                            child: Image.network(
-                              b.foto ?? '',
-                              fit: BoxFit.cover,
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                Image.network(
+                                  b.foto ?? '',
+                                  fit: BoxFit.cover,
+                                ),
+
+                                // overlay gelap biar teks kebaca
+                                Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.bottomCenter,
+                                      end: Alignment.topCenter,
+                                      colors: [
+                                        Colors.black.withOpacity(0.5),
+                                        Colors.transparent,
+                                      ],
+                                    ),
+                                  ),
+                                ),
+
+                                // judul berita
+                                Positioned(
+                                  left: 12,
+                                  right: 12,
+                                  bottom: 12,
+                                  child: Text(
+                                    b.judul,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ),
                           );
                         }).toList(),
                       ),
               ),
             ),
-
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.all(16),
@@ -183,7 +217,6 @@ class TimelinePageContent extends StatelessWidget {
                 ),
               ),
             ),
-
             loading
                 ? const SliverToBoxAdapter(
                     child: Center(child: CircularProgressIndicator()),
@@ -229,7 +262,6 @@ class TimelinePageContent extends StatelessWidget {
                       );
                     },
                   ),
-
             const SliverToBoxAdapter(child: SizedBox(height: 120)),
           ],
         ),
