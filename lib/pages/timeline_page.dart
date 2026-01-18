@@ -35,8 +35,6 @@ class _TimelinePageState extends State<TimelinePage> {
 
   final GlobalKey keyCarousel = GlobalKey();
   final GlobalKey keyNavBar = GlobalKey();
-  TutorialCoachMark? tutorialCoachMark;
-  List<TargetFocus> targets = [];
 
   List<Berita> beritaBantuan = [];
   List<Berita> beritaUmum = [];
@@ -56,23 +54,15 @@ class _TimelinePageState extends State<TimelinePage> {
         if (!_navVisible) setState(() => _navVisible = true);
       }
     });
-
-    if (widget.startTutorial) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        showTutorial();
-      });
-    }
   }
 
   Future<void> fetchData() async {
+    setState(() => loading = true);
+
     try {
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('token');
-
-      if (token == null) {
-        debugPrint("Token ga ketemu, user belum login");
-        return;
-      }
+      if (token == null) return;
 
       final api = ApiService();
       final allNews = await api.fetchBeritaByDaerah(token);
@@ -88,88 +78,13 @@ class _TimelinePageState extends State<TimelinePage> {
     }
   }
 
-  void showTutorial() {
-    targets = [
-      TargetFocus(
-        identify: "Carousel",
-        keyTarget: keyCarousel,
-        contents: [
-          TargetContent(
-            align: ContentAlign.bottom,
-            builder: (context, controller) => tutorialBox(
-              title: "Panduan Slider Utama",
-              text:
-                  "Slide ini menampilkan berita-berita utama dan pengumuman penting.",
-            ),
-          ),
-        ],
-      ),
-      TargetFocus(
-        identify: "NavBar",
-        keyTarget: keyNavBar,
-        contents: [
-          TargetContent(
-            align: ContentAlign.top,
-            builder: (context, controller) => tutorialBox(
-              title: "Navigation Bar",
-              text:
-                  "Gunakan tombol bawah ini untuk berpindah halaman dengan cepat.",
-            ),
-          ),
-        ],
-      ),
-    ];
-
-    tutorialCoachMark = TutorialCoachMark(
-      targets: targets,
-      colorShadow: Colors.black.withOpacity(0.6),
-      paddingFocus: 10,
-      textSkip: "Lewati",
-    );
-    tutorialCoachMark?.show(context: context);
-  }
-
-  Widget tutorialBox({required String title, required String text}) {
-    return Center(
-      child: Container(
-        width: 280,
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.25),
-              blurRadius: 16,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(title,
-                style: const TextStyle(
-                    color: Color(0xFF2C2C6B),
-                    fontWeight: FontWeight.bold,
-                    fontSize: 20)),
-            const SizedBox(height: 8),
-            Text(text,
-                style: const TextStyle(fontSize: 16),
-                textAlign: TextAlign.center),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _onNavTap(int index) {
     setState(() => _selectedIndex = index);
   }
 
   @override
   Widget build(BuildContext context) {
-    final List<Widget> pages = [
+    final pages = [
       TimelinePageContent(
         userName: widget.userData['nama'],
         keyCarousel: keyCarousel,
@@ -177,13 +92,12 @@ class _TimelinePageState extends State<TimelinePage> {
         loading: loading,
         sliderItems: beritaBantuan,
         beritaList: beritaUmum,
+        onRefresh: fetchData,
       ),
       const PengaduanPage(),
       const RegisterPage(),
       const RiwayatPengaduanPage(),
-      AkunPage(
-        warga: Warga.fromJson(widget.userData)
-      ),
+      AkunPage(warga: Warga.fromJson(widget.userData)),
     ];
 
     return Scaffold(
@@ -191,15 +105,10 @@ class _TimelinePageState extends State<TimelinePage> {
       bottomNavigationBar: AnimatedSlide(
         duration: const Duration(milliseconds: 400),
         offset: _navVisible ? Offset.zero : const Offset(0, 1.4),
-        curve: Curves.easeInOutCubicEmphasized,
-        child: AnimatedOpacity(
-          duration: const Duration(milliseconds: 400),
-          opacity: _navVisible ? 1 : 0,
-          child: FloatingNav(
-            key: keyNavBar,
-            currentIndex: _selectedIndex,
-            onTap: _onNavTap,
-          ),
+        child: FloatingNav(
+          key: keyNavBar,
+          currentIndex: _selectedIndex,
+          onTap: _onNavTap,
         ),
       ),
     );
@@ -212,8 +121,9 @@ class TimelinePageContent extends StatelessWidget {
   final ScrollController scrollController;
 
   final bool loading;
-  final List<Berita> sliderItems; // berita bantuan
-  final List<Berita> beritaList; // berita umum
+  final List<Berita> sliderItems;
+  final List<Berita> beritaList;
+  final Future<void> Function() onRefresh;
 
   const TimelinePageContent({
     super.key,
@@ -223,147 +133,106 @@ class TimelinePageContent extends StatelessWidget {
     required this.loading,
     required this.sliderItems,
     required this.beritaList,
+    required this.onRefresh,
   });
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-      child: CustomScrollView(
-        controller: scrollController,
-        slivers: [
-          SliverToBoxAdapter(child: HeaderBar(userName: userName)),
+      child: RefreshIndicator(
+        color: const Color(0xFF2E2A6A),
+        onRefresh: onRefresh,
+        child: CustomScrollView(
+          controller: scrollController,
+          physics: const AlwaysScrollableScrollPhysics(),
+          slivers: [
+            SliverToBoxAdapter(child: HeaderBar(userName: userName)),
 
-          // SLIDER ATAS
-          SliverToBoxAdapter(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 10),
-              child: loading
-                  ? const Center(child: CircularProgressIndicator())
-                  : CarouselSlider(
-                      key: keyCarousel,
-                      options: CarouselOptions(
-                        height: 200,
-                        autoPlay: true,
-                        enlargeCenterPage: true,
-                        viewportFraction: 0.9,
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 10),
+                child: loading
+                    ? const Center(child: CircularProgressIndicator())
+                    : CarouselSlider(
+                        key: keyCarousel,
+                        options: CarouselOptions(
+                          height: 200,
+                          autoPlay: true,
+                          enlargeCenterPage: true,
+                          viewportFraction: 0.9,
+                        ),
+                        items: sliderItems.map((b) {
+                          return ClipRRect(
+                            borderRadius: BorderRadius.circular(16),
+                            child: Image.network(
+                              b.foto ?? '',
+                              fit: BoxFit.cover,
+                            ),
+                          );
+                        }).toList(),
                       ),
-                      items: sliderItems.isEmpty
-                          ? [
-                              Container(
-                                alignment: Alignment.center,
-                                child: const Text("Tidak ada berita bantuan"),
-                              )
-                            ]
-                          : sliderItems.map((b) {
-                              return ClipRRect(
-                                borderRadius: BorderRadius.circular(16),
-                                child: Stack(
-                                  fit: StackFit.expand,
-                                  children: [
-                                    b.foto != null
-                                        ? Image.network(
-                                            b.foto!,
-                                            fit: BoxFit.cover,
-                                          )
-                                        : Container(color: Colors.grey),
-                                    Container(
-                                      decoration: BoxDecoration(
-                                        gradient: LinearGradient(
-                                          begin: Alignment.bottomCenter,
-                                          end: Alignment.topCenter,
-                                          colors: [
-                                            Colors.black.withOpacity(0.4),
-                                            Colors.transparent,
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-                                    Positioned(
-                                      bottom: 12,
-                                      left: 12,
-                                      right: 12,
-                                      child: Text(
-                                        b.judul,
-                                        style: const TextStyle(
-                                          color: Colors.white,
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                    ),
-            ),
-          ),
-
-          const SliverToBoxAdapter(
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16, 12, 16, 4),
-              child: Text(
-                "Berita Terbaru",
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
             ),
-          ),
 
-          // LIST BERITA UMUM
-          loading
-              ? const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.all(20),
-                    child: Center(child: CircularProgressIndicator()),
-                  ),
-                )
-              : SliverList.separated(
-                  itemCount: beritaList.length,
-                  separatorBuilder: (_, __) => const Gap(10),
-                  itemBuilder: (context, index) {
-                    final b = beritaList[index];
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      child: Card(
-                        elevation: 3,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            if (b.foto != null)
-                              ClipRRect(
-                                borderRadius: const BorderRadius.vertical(
-                                    top: Radius.circular(14)),
-                                child: Image.network(
-                                  b.foto!,
-                                  height: 180,
-                                  width: double.infinity,
-                                  fit: BoxFit.cover,
-                                ),
-                              ),
-                            Padding(
-                              padding: const EdgeInsets.all(12),
-                              child: Text(
-                                b.judul,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    );
-                  },
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  "Berita Terbaru",
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
+              ),
+            ),
 
-          const SliverToBoxAdapter(child: SizedBox(height: 100)),
-        ],
+            loading
+                ? const SliverToBoxAdapter(
+                    child: Center(child: CircularProgressIndicator()),
+                  )
+                : SliverList.builder(
+                    itemCount: beritaList.length,
+                    itemBuilder: (context, index) {
+                      final b = beritaList[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 12, vertical: 6),
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(14),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              if (b.foto != null)
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.vertical(
+                                      top: Radius.circular(14)),
+                                  child: Image.network(
+                                    b.foto!,
+                                    height: 180,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                              Padding(
+                                padding: const EdgeInsets.all(12),
+                                child: Text(
+                                  b.judul,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 18,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 120)),
+          ],
+        ),
       ),
     );
   }
