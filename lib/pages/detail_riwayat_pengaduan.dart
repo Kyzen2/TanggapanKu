@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:intl/intl.dart';
-import 'package:tanggapanku/api/api_service.dart';
 import 'package:tanggapanku/models/pengaduan.dart';
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class DetailRiwayatPengaduanPage extends StatefulWidget {
   final Pengaduan pengaduan;
@@ -23,14 +24,29 @@ class _DetailRiwayatPengaduanPageState
   final PageController _pageController = PageController();
 
   late final List<String> images;
+  String? namaWarga;
 
   @override
   void initState() {
     super.initState();
+    _loadUser();
+
     images = widget.pengaduan.foto
         .where((e) => e.pathFoto.isNotEmpty)
         .map((e) => 'https://firmly-splendid-dove.ngrok-free.app/${e.pathFoto}')
         .toList();
+  }
+
+  Future<void> _loadUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userStr = prefs.getString('user');
+
+    if (userStr != null) {
+      final user = jsonDecode(userStr);
+      setState(() {
+        namaWarga = user['nama']; // sesuaikan key kalau beda
+      });
+    }
   }
 
   @override
@@ -146,7 +162,7 @@ class _DetailRiwayatPengaduanPageState
         ),
         const SizedBox(width: 10),
         Text(
-          'Warga',
+          namaWarga ?? 'Warga',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w500,
           ),

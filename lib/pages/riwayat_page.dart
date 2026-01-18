@@ -29,14 +29,41 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
     });
   }
 
+  // 🔥 WARNA STATUS (KONSISTEN DENGAN DETAIL PAGE)
+  Color _statusColor(String status) {
+    switch (status) {
+      case 'Selesai':
+        return Colors.green;
+      case 'Ditolak':
+        return Colors.red;
+      case 'Diproses':
+        return Colors.orange;
+      case 'Diajukan':
+        return Colors.blueGrey;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  String _getCatatanFromStatus(String status) {
+    switch (status) {
+      case 'Diajukan':
+        return 'Sedang diajukan';
+      case 'Diproses':
+        return 'Sedang diproses';
+      case 'Selesai':
+        return 'Sudah selesai, terima kasih';
+      case 'Ditolak':
+        return 'Pengaduan ditolak';
+      default:
+        return '-';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-
-    const Color primaryBlueDark = Color(0xFF2C3E50);
-    const Color backgroundBlue = Color(0xFF39377C);
-    const Color white = Colors.white;
 
     if (token == null) {
       return const Scaffold(
@@ -45,7 +72,7 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
     }
 
     return Scaffold(
-      backgroundColor: white,
+      backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: const Color(0xFF2E2A6A),
         elevation: 0,
@@ -55,7 +82,6 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
               'assets/Logo.png',
               height: screenHeight * 0.032,
               width: screenHeight * 0.032,
-              fit: BoxFit.contain,
             ),
             SizedBox(width: screenWidth * 0.02),
             Text(
@@ -91,7 +117,7 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
                     style: GoogleFonts.inter(
                       fontWeight: FontWeight.w600,
                       fontSize: screenWidth * 0.06,
-                      color: primaryBlueDark,
+                      color: const Color(0xFF2C3E50),
                     ),
                   ),
                 ],
@@ -115,23 +141,18 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
                     return const Center(child: Text('Belum ada pengaduan.'));
                   }
 
-                  final pengaduanList = snapshot.data!;
+                  final list = snapshot.data!;
                   return ListView.separated(
-                    itemCount: pengaduanList.length,
+                    itemCount: list.length,
                     separatorBuilder: (_, __) =>
                         SizedBox(height: screenHeight * 0.01),
                     itemBuilder: (context, index) {
-                      final p = pengaduanList[index];
-                      final catatan = _getCatatanFromStatus(p.status);
-
+                      final p = list[index];
                       return _buildPengaduanCard(
                         context,
                         pengaduan: p,
-                        judul: p.judul,
-                        tanggal: p.tglPengaduan,
-                        catatan: catatan,
-                        status: p.status,
-                        onPressed: () {},
+                        statusColor: _statusColor(p.status),
+                        catatan: _getCatatanFromStatus(p.status),
                       );
                     },
                   );
@@ -144,37 +165,19 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
     );
   }
 
-  String _getCatatanFromStatus(String status) {
-    switch (status) {
-      case 'Diajukan':
-        return 'Sedang diajukan';
-      case 'Diproses':
-        return 'Sedang diproses';
-      case 'Selesai':
-        return 'Sudah selesai, terima kasih';
-      case 'Ditolak':
-        return 'Pengaduan ditolak';
-      default:
-        return '-';
-    }
-  }
-
   Widget _buildPengaduanCard(
     BuildContext context, {
     required Pengaduan pengaduan,
-    required String judul,
-    required String tanggal,
+    required Color statusColor,
     required String catatan,
-    required String status,
-    required VoidCallback onPressed,
   }) {
     final screenWidth = MediaQuery.of(context).size.width;
+
     return Card(
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(7),
         side: BorderSide(color: Colors.grey.shade300),
       ),
-      margin: const EdgeInsets.symmetric(vertical: 4),
       elevation: 2,
       child: Padding(
         padding:
@@ -183,7 +186,7 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              judul,
+              pengaduan.judul,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: GoogleFonts.poppins(
@@ -191,14 +194,14 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
                 fontSize: screenWidth * 0.035,
               ),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 4),
             Row(
               children: [
-                Icon(Icons.calendar_today_outlined,
-                    size: 14, color: Colors.grey[700]),
+                const Icon(Icons.calendar_today_outlined,
+                    size: 14, color: Colors.grey),
                 const SizedBox(width: 5),
                 Text(
-                  tanggal,
+                  pengaduan.tglPengaduan,
                   style: GoogleFonts.poppins(
                     fontSize: screenWidth * 0.03,
                     color: Colors.grey[800],
@@ -206,7 +209,7 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 4),
             Text(
               'Catatan : $catatan',
               style: GoogleFonts.poppins(
@@ -214,14 +217,15 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
                 color: Colors.grey[700],
               ),
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: 4),
             InkWell(
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) =>
-                        DetailRiwayatPengaduanPage(pengaduan: pengaduan),
+                    builder: (_) => DetailRiwayatPengaduanPage(
+                      pengaduan: pengaduan,
+                    ),
                   ),
                 );
               },
@@ -231,32 +235,25 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
                   fontSize: screenWidth * 0.03,
                   color: const Color(0xFF39377C),
                   decoration: TextDecoration.underline,
-                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-            const SizedBox(height: 7),
+            const SizedBox(height: 8),
             Align(
               alignment: Alignment.bottomRight,
-              child: ElevatedButton(
-                onPressed: onPressed,
-                style: ElevatedButton.styleFrom(
-                  elevation: 0,
-                  backgroundColor: status == 'Selesai'
-                      ? const Color(0xFF2C3E50)
-                      : const Color(0xFF39377C),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(7),
-                  ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 7),
+              child: Container(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: statusColor,
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  status,
+                  pengaduan.status,
                   style: GoogleFonts.poppins(
-                    fontWeight: FontWeight.w600,
                     fontSize: screenWidth * 0.033,
                     color: Colors.white,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
