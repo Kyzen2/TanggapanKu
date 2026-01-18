@@ -146,7 +146,7 @@ class _AkunPageState extends State<AkunPage> {
                           children: [
                             const CircleAvatar(
                               radius: 24,
-                              backgroundColor: Colors.grey,
+                              backgroundColor: Color(0xFF2E2A6A),
                               child: Icon(
                                 Icons.person_outline,
                                 color: Colors.white,

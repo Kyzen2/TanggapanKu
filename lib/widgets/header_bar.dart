@@ -29,7 +29,7 @@ class HeaderBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
             child: const CircleAvatar(
               radius: 23,
-              backgroundColor: Colors.grey,
+              backgroundColor: Color(0xFF2E2A6A),
               child: Icon(
                 Icons.person_outline,
                 color: Colors.white,
