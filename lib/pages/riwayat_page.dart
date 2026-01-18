@@ -14,7 +14,9 @@ class RiwayatPengaduanPage extends StatefulWidget {
 
 class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
   final api = ApiService();
+
   String? token;
+  late Future<List<Pengaduan>> _futureRiwayat;
 
   @override
   void initState() {
@@ -24,12 +26,23 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
 
   Future<void> _loadToken() async {
     final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      token = prefs.getString('token');
-    });
+    final t = prefs.getString('token');
+
+    if (t != null) {
+      setState(() {
+        token = t;
+        _futureRiwayat = api.fetchRiwayatPengaduan(token!);
+      });
+    }
   }
 
-  // 🔥 WARNA STATUS (KONSISTEN DENGAN DETAIL PAGE)
+  Future<void> _refreshData() async {
+    setState(() {
+      _futureRiwayat = api.fetchRiwayatPengaduan(token!);
+    });
+    await _futureRiwayat;
+  }
+
   Color _statusColor(String status) {
     switch (status) {
       case 'Selesai':
@@ -126,35 +139,52 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
             SizedBox(height: screenHeight * 0.03),
             Expanded(
               child: FutureBuilder<List<Pengaduan>>(
-                future: api.fetchRiwayatPengaduan(token!),
+                future: _futureRiwayat,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (snapshot.hasError) {
+                  }
+
+                  if (snapshot.hasError) {
                     return Center(
                       child: Text(
                         'Error: ${snapshot.error}',
                         style: const TextStyle(color: Colors.red),
                       ),
                     );
-                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return const Center(child: Text('Belum ada pengaduan.'));
+                  }
+
+                  if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return RefreshIndicator(
+                      onRefresh: _refreshData,
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        children: const [
+                          SizedBox(height: 200),
+                          Center(child: Text('Belum ada pengaduan.')),
+                        ],
+                      ),
+                    );
                   }
 
                   final list = snapshot.data!;
-                  return ListView.separated(
-                    itemCount: list.length,
-                    separatorBuilder: (_, __) =>
-                        SizedBox(height: screenHeight * 0.01),
-                    itemBuilder: (context, index) {
-                      final p = list[index];
-                      return _buildPengaduanCard(
-                        context,
-                        pengaduan: p,
-                        statusColor: _statusColor(p.status),
-                        catatan: _getCatatanFromStatus(p.status),
-                      );
-                    },
+                  return RefreshIndicator(
+                    onRefresh: _refreshData,
+                    child: ListView.separated(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      itemCount: list.length,
+                      separatorBuilder: (_, __) =>
+                          SizedBox(height: screenHeight * 0.01),
+                      itemBuilder: (context, index) {
+                        final p = list[index];
+                        return _buildPengaduanCard(
+                          context,
+                          pengaduan: p,
+                          statusColor: _statusColor(p.status),
+                          catatan: _getCatatanFromStatus(p.status),
+                        );
+                      },
+                    ),
                   );
                 },
               ),
@@ -219,15 +249,15 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
             ),
             const SizedBox(height: 4),
             InkWell(
-              onTap: () {
-                Navigator.push(
+              onTap: () async {
+                await Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (_) => DetailRiwayatPengaduanPage(
-                      pengaduan: pengaduan,
-                    ),
+                    builder: (_) =>
+                        DetailRiwayatPengaduanPage(pengaduan: pengaduan),
                   ),
                 );
+                _refreshData();
               },
               child: Text(
                 'Lihat Progress Laporan',
