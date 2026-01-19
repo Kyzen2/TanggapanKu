@@ -226,4 +226,30 @@ class ApiService {
 
     return data.map((e) => Berita.fromJson(e)).toList();
   }
+
+  // GET /daerah/user
+  Future<Daerah> fetchDaerahUser(String token) async {
+    final res = await http.get(
+      Uri.parse('$baseUrl/daerah/user'),
+      headers: {
+        "Authorization": "Bearer $token",
+        "accept": "application/json",
+        'ngrok-skip-browser-warning': 'true',
+      },
+    );
+
+    if (res.statusCode < 200 || res.statusCode >= 300) {
+      throw Exception('Gagal load daerah user: ${_preview(res.body)}');
+    }
+
+    final jsonMap = jsonDecode(res.body);
+
+    // backend: { message, daerah: { ... } }
+    final daerahJson = jsonMap['daerah'];
+    if (daerahJson == null) {
+      throw Exception('Data daerah user kosong');
+    }
+
+    return Daerah.fromJson(daerahJson);
+  }
 }

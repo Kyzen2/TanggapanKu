@@ -1,35 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:tanggapanku/pages/pengaduan.dart';
+import '../models/region.dart';
+import '../pages/pengaduan.dart';
 
 class FloatingNav extends StatelessWidget {
   final int currentIndex;
   final Function(int) onTap;
+  final Daerah? daerahUser;
+  final Future<void> Function()? openWhatsApp;
 
   const FloatingNav({
     super.key,
     required this.currentIndex,
     required this.onTap,
+    this.daerahUser,
+    this.openWhatsApp,
   });
-
-  Future<void> _openWhatsApp(BuildContext context) async {
-    const phone = '628131128454'; // ganti kalau perlu
-    const message =
-        'Halo Admin TanggapanKu, saya mau bertanya terkait aplikasi';
-
-    final url = Uri.parse(
-      'https://wa.me/$phone?text=${Uri.encodeComponent(message)}',
-    );
-
-    if (!await launchUrl(
-      url,
-      mode: LaunchMode.externalApplication,
-    )) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('WhatsApp tidak ditemukan')),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,27 +31,23 @@ class FloatingNav extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
           _buildNavItem(context, Icons.home_rounded, 0),
-
           // CHAT → LANGSUNG WA
           InkWell(
             borderRadius: BorderRadius.circular(30),
-            onTap: () => _openWhatsApp(context),
+            onTap: () => openWhatsApp?.call(),
             child: _navItemContent(
               icon: Icons.chat_bubble_outline_rounded,
               label: "Chat",
               selected: false,
             ),
           ),
-
           // ADD PENGADUAN
           InkWell(
             borderRadius: BorderRadius.circular(30),
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => const PengaduanPage(),
-                ),
+                MaterialPageRoute(builder: (_) => const PengaduanPage()),
               );
             },
             child: Container(
@@ -78,7 +60,6 @@ class FloatingNav extends StatelessWidget {
               child: const Icon(Icons.add, color: Colors.white, size: 26),
             ),
           ),
-
           _buildNavItem(context, Icons.history, 3),
           _buildNavItem(context, Icons.person_outline_rounded, 4),
         ],
@@ -88,7 +69,6 @@ class FloatingNav extends StatelessWidget {
 
   Widget _buildNavItem(BuildContext context, IconData icon, int index) {
     final isSelected = currentIndex == index;
-
     return InkWell(
       borderRadius: BorderRadius.circular(30),
       onTap: () => onTap(index),
@@ -125,17 +105,17 @@ class FloatingNav extends StatelessWidget {
       ],
     );
   }
-}
 
-String _getLabel(int index) {
-  switch (index) {
-    case 0:
-      return "Beranda";
-    case 3:
-      return "Riwayat";
-    case 4:
-      return "Profil";
-    default:
-      return "";
+  String _getLabel(int index) {
+    switch (index) {
+      case 0:
+        return "Beranda";
+      case 3:
+        return "Riwayat";
+      case 4:
+        return "Profil";
+      default:
+        return "";
+    }
   }
 }

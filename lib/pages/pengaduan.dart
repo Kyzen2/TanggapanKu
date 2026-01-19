@@ -145,7 +145,7 @@ class _PengaduanPageState extends State<PengaduanPage> {
         title: Row(
           children: [
             Image.asset(
-              'assets/Logo.png',
+              'assets/logo.png',
               height: 22,
               fit: BoxFit.contain,
             ),

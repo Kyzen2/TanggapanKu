@@ -92,7 +92,7 @@ class _RiwayatPengaduanPageState extends State<RiwayatPengaduanPage> {
         title: Row(
           children: [
             Image.asset(
-              'assets/Logo.png',
+              'assets/logo.png',
               height: screenHeight * 0.032,
               width: screenHeight * 0.032,
             ),

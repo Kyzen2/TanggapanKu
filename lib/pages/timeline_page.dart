@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:carousel_slider/carousel_slider.dart';
-import 'package:gap/gap.dart';
-import 'package:tutorial_coach_mark/tutorial_coach_mark.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tanggapanku/models/region.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:tanggapanku/api/api_service.dart';
 import 'package:tanggapanku/models/berita.dart';
 import 'package:tanggapanku/models/warga.dart';
@@ -12,7 +13,6 @@ import 'pengaduan.dart';
 import 'pengaturan_page.dart';
 import 'register.dart';
 import 'riwayat_page.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class TimelinePage extends StatefulWidget {
   final Map<String, dynamic> userData;
@@ -32,7 +32,6 @@ class _TimelinePageState extends State<TimelinePage> {
   int _selectedIndex = 0;
   bool _navVisible = true;
   final ScrollController _scrollController = ScrollController();
-
   final GlobalKey keyCarousel = GlobalKey();
   final GlobalKey keyNavBar = GlobalKey();
 
@@ -40,10 +39,14 @@ class _TimelinePageState extends State<TimelinePage> {
   List<Berita> beritaUmum = [];
   bool loading = true;
 
+  // === tambahan untuk WA dan daerahUser ===
+  Daerah? _daerahUser;
+
   @override
   void initState() {
     super.initState();
     fetchData();
+    _loadDaerahUser();
 
     _scrollController.addListener(() {
       if (_scrollController.position.userScrollDirection ==
@@ -73,13 +76,46 @@ class _TimelinePageState extends State<TimelinePage> {
       debugPrint("Error load berita: $e");
     }
 
-    if (mounted) {
-      setState(() => loading = false);
+    if (mounted) setState(() => loading = false);
+  }
+
+  Future<void> _loadDaerahUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (token != null) {
+      try {
+        final api = ApiService();
+        final data = await api.fetchDaerahUser(token);
+        if (mounted) setState(() => _daerahUser = data);
+      } catch (e) {
+        debugPrint("Gagal fetch daerahUser: $e");
+      }
     }
   }
 
   void _onNavTap(int index) {
     setState(() => _selectedIndex = index);
+  }
+
+  Future<void> _openWhatsApp() async {
+    if (_daerahUser == null || _daerahUser!.noTelp.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Nomor WhatsApp belum tersedia')),
+      );
+      return;
+    }
+
+    String phone = _daerahUser!.noTelp;
+    if (phone.startsWith('0')) phone = '62${phone.substring(1)}';
+
+    const message = 'Halo saya ingin mengecek pengaduan saya';
+    final url =
+        Uri.parse('https://wa.me/$phone?text=${Uri.encodeComponent(message)}');
+    if (!await launchUrl(url, mode: LaunchMode.externalApplication)) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('WhatsApp tidak ditemukan')),
+      );
+    }
   }
 
   @override
@@ -109,17 +145,19 @@ class _TimelinePageState extends State<TimelinePage> {
           key: keyNavBar,
           currentIndex: _selectedIndex,
           onTap: _onNavTap,
+          daerahUser: _daerahUser, // <-- kirim data daerahUser ke nav
+          openWhatsApp: _openWhatsApp, // <-- optional callback WA
         ),
       ),
     );
   }
 }
 
+// === TimelinePageContent tetap sama ===
 class TimelinePageContent extends StatelessWidget {
   final String userName;
   final GlobalKey keyCarousel;
   final ScrollController scrollController;
-
   final bool loading;
   final List<Berita> sliderItems;
   final List<Berita> beritaList;
@@ -146,68 +184,81 @@ class TimelinePageContent extends StatelessWidget {
           controller: scrollController,
           physics: const AlwaysScrollableScrollPhysics(),
           slivers: [
+            // Header
             SliverToBoxAdapter(child: HeaderBar(userName: userName)),
+
+            // Slider atau teks "Tidak ada berita bantuan"
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 10),
                 child: loading
                     ? const Center(child: CircularProgressIndicator())
-                    : CarouselSlider(
-                        key: keyCarousel,
-                        options: CarouselOptions(
-                          height: 200,
-                          autoPlay: true,
-                          enlargeCenterPage: true,
-                          viewportFraction: 0.9,
-                        ),
-                        items: sliderItems.map((b) {
-                          return ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                Image.network(
-                                  b.foto ?? '',
-                                  fit: BoxFit.cover,
-                                ),
-
-                                // overlay gelap biar teks kebaca
-                                Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      begin: Alignment.bottomCenter,
-                                      end: Alignment.topCenter,
-                                      colors: [
-                                        Colors.black.withOpacity(0.5),
-                                        Colors.transparent,
-                                      ],
-                                    ),
-                                  ),
-                                ),
-
-                                // judul berita
-                                Positioned(
-                                  left: 12,
-                                  right: 12,
-                                  bottom: 12,
-                                  child: Text(
-                                    b.judul,
-                                    maxLines: 2,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                    : (sliderItems.isEmpty
+                        ? const Padding(
+                            padding: EdgeInsets.all(16),
+                            child: Text(
+                              "Tidak ada berita bantuan",
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.grey,
+                              ),
                             ),
-                          );
-                        }).toList(),
-                      ),
+                          )
+                        : CarouselSlider(
+                            key: keyCarousel,
+                            options: CarouselOptions(
+                              height: 200,
+                              autoPlay: true,
+                              enlargeCenterPage: true,
+                              viewportFraction: 0.9,
+                            ),
+                            items: sliderItems.map((b) {
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(16),
+                                child: Stack(
+                                  fit: StackFit.expand,
+                                  children: [
+                                    Image.network(
+                                      b.foto ?? '',
+                                      fit: BoxFit.cover,
+                                    ),
+                                    Container(
+                                      decoration: BoxDecoration(
+                                        gradient: LinearGradient(
+                                          begin: Alignment.bottomCenter,
+                                          end: Alignment.topCenter,
+                                          colors: [
+                                            Colors.black.withOpacity(0.5),
+                                            Colors.transparent,
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      left: 12,
+                                      right: 12,
+                                      bottom: 12,
+                                      child: Text(
+                                        b.judul,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              );
+                            }).toList(),
+                          )),
               ),
             ),
+
+            // Label Berita Terbaru
             const SliverToBoxAdapter(
               child: Padding(
                 padding: EdgeInsets.all(16),
@@ -217,6 +268,8 @@ class TimelinePageContent extends StatelessWidget {
                 ),
               ),
             ),
+
+            // Daftar berita umum
             loading
                 ? const SliverToBoxAdapter(
                     child: Center(child: CircularProgressIndicator()),
@@ -262,6 +315,8 @@ class TimelinePageContent extends StatelessWidget {
                       );
                     },
                   ),
+
+            // Spacer bawah
             const SliverToBoxAdapter(child: SizedBox(height: 120)),
           ],
         ),

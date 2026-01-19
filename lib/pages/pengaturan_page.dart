@@ -102,7 +102,7 @@ class _AkunPageState extends State<AkunPage> {
         title: Row(
           children: [
             Image.asset(
-              'assets/Logo.png',
+              'assets/logo.png',
               height: 22,
               fit: BoxFit.contain,
             ),

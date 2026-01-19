@@ -31,12 +31,14 @@ class RegionPage {
 class Daerah {
   final int id;
   final String namaDaerah;
+  final String noTelp; // ditambah sesuai DB
   final String createdAt;
   final String updatedAt;
 
   Daerah({
     required this.id,
     required this.namaDaerah,
+    required this.noTelp,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -45,6 +47,7 @@ class Daerah {
     return Daerah(
       id: json['id'] ?? 0,
       namaDaerah: json['nama_daerah'] ?? '',
+      noTelp: json['no_telp'] ?? '', // ambil dari API
       createdAt: json['created_at'] ?? '',
       updatedAt: json['updated_at'] ?? '',
     );
@@ -54,6 +57,7 @@ class Daerah {
     return {
       'id': id,
       'nama_daerah': namaDaerah,
+      'no_telp': noTelp,
       'created_at': createdAt,
       'updated_at': updatedAt,
     };
