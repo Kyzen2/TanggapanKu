@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:intl/intl.dart';
 
 class DetailBeritaPage extends StatefulWidget {
@@ -11,13 +10,7 @@ class DetailBeritaPage extends StatefulWidget {
 }
 
 class _DetailBeritaPageState extends State<DetailBeritaPage> {
-  final PageController _pageController = PageController();
-
-  final List<String> images = [
-    'https://picsum.photos/800/400?1',
-    'https://picsum.photos/800/400?2',
-    'https://picsum.photos/800/400?3',
-  ];
+  final String imageUrl = 'https://picsum.photos/800/400';
 
   @override
   Widget build(BuildContext context) {
@@ -96,8 +89,8 @@ class _DetailBeritaPageState extends State<DetailBeritaPage> {
 
           const SizedBox(height: 12),
 
-          /// SLIDER GAMBAR
-          _imageSlider(),
+          /// GAMBAR BERITA (SINGLE)
+          _imageSingle(),
 
           const SizedBox(height: 12),
 
@@ -112,7 +105,6 @@ class _DetailBeritaPageState extends State<DetailBeritaPage> {
                   color: Colors.grey,
                 ),
               ),
-              _categoryBadge('Informasi'),
             ],
           ),
         ],
@@ -139,44 +131,24 @@ class _DetailBeritaPageState extends State<DetailBeritaPage> {
     );
   }
 
-  Widget _imageSlider() {
-    return Column(
-      children: [
-        AspectRatio(
-          aspectRatio: 16 / 9,
-          child: PageView.builder(
-            controller: _pageController,
-            itemCount: images.length,
-            itemBuilder: (context, index) {
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.network(
-                  images[index],
-                  fit: BoxFit.cover,
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return const Center(
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    );
-                  },
-                  errorBuilder: (_, __, ___) =>
-                      const Center(child: Icon(Icons.broken_image)),
-                ),
-              );
-            },
-          ),
+  Widget _imageSingle() {
+    return AspectRatio(
+      aspectRatio: 16 / 9,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(12),
+        child: Image.network(
+          imageUrl,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, loadingProgress) {
+            if (loadingProgress == null) return child;
+            return const Center(
+              child: CircularProgressIndicator(strokeWidth: 2),
+            );
+          },
+          errorBuilder: (_, __, ___) =>
+              const Center(child: Icon(Icons.broken_image)),
         ),
-        const SizedBox(height: 8),
-        SmoothPageIndicator(
-          controller: _pageController,
-          count: images.length,
-          effect: const WormEffect(
-            dotHeight: 8,
-            dotWidth: 8,
-            activeDotColor: Color(0xFF2E2A6A),
-          ),
-        ),
-      ],
+      ),
     );
   }
 
