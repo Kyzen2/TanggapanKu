@@ -9,6 +9,7 @@ import 'package:tanggapanku/pages/login.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:tanggapanku/pages/profile_page.dart';
 import 'package:tanggapanku/api/api_service.dart';
+import 'package:tanggapanku/pages/panduan_page.dart';
 
 class AkunPage extends StatefulWidget {
   final Warga warga;
@@ -259,7 +260,27 @@ class _AkunPageState extends State<AkunPage> {
               },
             ),
             _menuItem(
-                context, Icons.menu_book, "Panduan Penggunaan Aplikasi", () {}),
+              context,
+              Icons.menu_book,
+              "Panduan Penggunaan Aplikasi",
+              () {
+                Navigator.push(
+                  context,
+                  PageRouteBuilder(
+                    pageBuilder: (_, __, ___) => const PanduanPage(),
+                    transitionsBuilder: (_, animation, __, child) {
+                      return SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(1, 0),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      );
+                    },
+                  ),
+                );
+              },
+            ),
             _menuItem(
               context,
               Icons.help_outline,
@@ -276,14 +297,12 @@ class _AkunPageState extends State<AkunPage> {
                 );
               },
             ),
-
             _menuItem(
               context,
               Icons.support_agent,
               "Hubungi Kami",
               _hubungiKami,
             ),
-            
             const SizedBox(height: 20),
             Center(
               child: GestureDetector(
@@ -623,5 +642,3 @@ Widget _faqItem({
     ),
   );
 }
-
-// ================ PERTANYAAN UMUM SHEET ==================
