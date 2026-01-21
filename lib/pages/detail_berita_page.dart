@@ -1,16 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
+import 'package:tanggapanku/models/berita.dart';
 
-class DetailBeritaPage extends StatefulWidget {
-  const DetailBeritaPage({super.key});
+class DetailBeritaPage extends StatelessWidget {
+  final Berita berita;
 
-  @override
-  State<DetailBeritaPage> createState() => _DetailBeritaPageState();
-}
-
-class _DetailBeritaPageState extends State<DetailBeritaPage> {
-  final String imageUrl = 'https://picsum.photos/800/400';
+  const DetailBeritaPage({
+    super.key,
+    required this.berita,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -31,14 +30,9 @@ class _DetailBeritaPageState extends State<DetailBeritaPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            _beritaCard(),
-            const Spacer(),
-          ],
-        ),
+        child: _beritaCard(),
       ),
     );
   }
@@ -55,7 +49,7 @@ class _DetailBeritaPageState extends State<DetailBeritaPage> {
             color: Colors.black.withOpacity(0.06),
             blurRadius: 10,
             offset: const Offset(0, 4),
-          )
+          ),
         ],
       ),
       child: Column(
@@ -64,48 +58,45 @@ class _DetailBeritaPageState extends State<DetailBeritaPage> {
           _authorHeader(),
           const SizedBox(height: 12),
 
+          /// BADGE KATEGORI
+          _categoryBadge(berita.kategori),
+          const SizedBox(height: 12),
+
           /// JUDUL
           Text(
-            'Kerja Bakti Warga Membersihkan Lingkungan',
+            berita.judul,
             style: GoogleFonts.poppins(
-              fontSize: 16,
+              fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
           ),
 
-          const SizedBox(height: 6),
+          const SizedBox(height: 8),
 
-          /// ISI BERITA
+          /// TANGGAL
           Text(
-            'Warga RT 05 melakukan kerja bakti bersama untuk membersihkan '
-            'saluran air dan lingkungan sekitar demi menjaga kebersihan '
-            'dan kesehatan bersama.',
+            _formatTanggal(berita.tglTerbit),
             style: GoogleFonts.poppins(
-              fontSize: 13,
-              color: Colors.grey[700],
-              height: 1.6,
+              fontSize: 12,
+              color: Colors.grey,
             ),
           ),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
-          /// GAMBAR BERITA (SINGLE)
-          _imageSingle(),
+          /// GAMBAR
+          if (berita.foto != null) _imageSingle(berita.foto!),
 
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
 
-          /// FOOTER
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                DateFormat('dd MMM yyyy').format(DateTime.now()),
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: Colors.grey,
-                ),
-              ),
-            ],
+          /// DESKRIPSI
+          Text(
+            berita.deskripsi ?? '-',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              color: Colors.grey[800],
+              height: 1.7,
+            ),
           ),
         ],
       ),
@@ -122,7 +113,7 @@ class _DetailBeritaPageState extends State<DetailBeritaPage> {
         ),
         const SizedBox(width: 10),
         Text(
-          'Admin Desa',
+          'Admin',
           style: GoogleFonts.poppins(
             fontWeight: FontWeight.w500,
           ),
@@ -131,7 +122,7 @@ class _DetailBeritaPageState extends State<DetailBeritaPage> {
     );
   }
 
-  Widget _imageSingle() {
+  Widget _imageSingle(String imageUrl) {
     return AspectRatio(
       aspectRatio: 16 / 9,
       child: ClipRRect(
@@ -168,5 +159,13 @@ class _DetailBeritaPageState extends State<DetailBeritaPage> {
         ),
       ),
     );
+  }
+
+  String _formatTanggal(String rawDate) {
+    try {
+      return DateFormat('dd MMM yyyy').format(DateTime.parse(rawDate));
+    } catch (_) {
+      return '-';
+    }
   }
 }

@@ -30,7 +30,7 @@ class MyApp extends StatelessWidget {
         textTheme: GoogleFonts.poppinsTextTheme(),
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF00B6A0)),
       ),
-      home: const PanduanPage(),
+      home: const SplashScreen(),
     );
   }
 }

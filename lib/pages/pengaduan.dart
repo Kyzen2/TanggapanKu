@@ -74,13 +74,6 @@ class _PengaduanPageState extends State<PengaduanPage> {
   }
 
   Future<void> _submitPengaduan() async {
-    if (_judul.text.length < 8) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Judul minimal 8 karakter")),
-      );
-      return;
-    }
-
     if (_deskripsi.text.length < 10) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Kronologi terlalu pendek.")),

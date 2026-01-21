@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import 'package:tanggapanku/api/api_service.dart';
 import 'package:tanggapanku/pages/register.dart';
@@ -23,6 +24,31 @@ class _LoginPageState extends State<LoginPage> {
   bool _isPasswordVisible = false;
   bool _loading = false;
 
+  // ===================== LUPA PASSWORD =====================
+  Future<void> _lupaPassword() async {
+    const phone = '628131128454';
+    final nik = nikC.text.trim();
+
+    final message = nik.isEmpty
+        ? 'Halo Admin TanggapanKu, saya lupa password akun saya dan butuh bantuan.'
+        : 'Halo Admin TanggapanKu, saya lupa password';
+
+    final url = Uri.parse(
+      'https://wa.me/$phone?text=${Uri.encodeComponent(message)}',
+    );
+
+    if (!await launchUrl(
+      url,
+      mode: LaunchMode.externalApplication,
+    )) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('WhatsApp tidak ditemukan')),
+      );
+    }
+  }
+
+  // ===================== LOGIN =====================
   Future<void> login() async {
     if (nikC.text.isEmpty || passC.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -60,9 +86,7 @@ class _LoginPageState extends State<LoginPage> {
         );
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(body['message'] ?? 'Login gagal'),
-          ),
+          SnackBar(content: Text(body['message'] ?? 'Login gagal')),
         );
       }
     } catch (e) {
@@ -70,16 +94,13 @@ class _LoginPageState extends State<LoginPage> {
         SnackBar(content: Text('Terjadi kesalahan: $e')),
       );
     } finally {
-      if (mounted) {
-        setState(() => _loading = false);
-      }
+      if (mounted) setState(() => _loading = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
-    final keyboard = MediaQuery.of(context).viewInsets.bottom;
 
     const Color primaryBlueDark = Color(0xFF2C3E50);
     const Color accentBlue = Color(0xFF3F51B5);
@@ -92,18 +113,15 @@ class _LoginPageState extends State<LoginPage> {
             height: size.height * 0.38,
             child: Stack(
               children: [
-                // Background ungu
                 Container(
                   decoration: const BoxDecoration(
-                    color: Color(0xFF2C3E50),
+                    color: primaryBlueDark,
                     borderRadius: BorderRadius.only(
                       bottomLeft: Radius.circular(28),
                       bottomRight: Radius.circular(28),
                     ),
                   ),
                 ),
-
-                // Foto (dibatesin ukurannya)
                 Align(
                   alignment: Alignment.bottomRight,
                   child: Transform.translate(
@@ -115,8 +133,6 @@ class _LoginPageState extends State<LoginPage> {
                     ),
                   ),
                 ),
-
-                // Text content
                 Padding(
                   padding: EdgeInsets.symmetric(
                     horizontal: size.width * 0.07,
@@ -166,6 +182,8 @@ class _LoginPageState extends State<LoginPage> {
               ],
             ),
           ),
+
+          // ===================== FORM =====================
           Expanded(
             child: Container(
               color: Colors.white,
@@ -213,10 +231,12 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
+
+                    // 🔥 FIXED BUTTON
                     Align(
                       alignment: Alignment.centerRight,
                       child: TextButton(
-                        onPressed: () {},
+                        onPressed: _lupaPassword,
                         child: Text(
                           'Lupa Password?',
                           style: GoogleFonts.poppins(
@@ -226,6 +246,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
+
                     SizedBox(height: size.height * 0.015),
                     ElevatedButton(
                       onPressed: _loading ? null : login,
